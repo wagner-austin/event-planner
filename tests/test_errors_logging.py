@@ -29,10 +29,9 @@ class TestErrorsLogging(unittest.TestCase):
         scope_typed["query_string"] = b""
         scope_typed["headers"] = []
         req = Request(scope_typed)  # minimal scope
-        loop = asyncio.get_event_loop()
-        res1: JSONResponse = loop.run_until_complete(app_error_handler(req, AppError("E", "oops")))
+        res1: JSONResponse = asyncio.run(app_error_handler(req, AppError("E", "oops")))
         self.assertEqual(res1.status_code, 400)
-        res2: JSONResponse = loop.run_until_complete(unhandled_error_handler(req, Exception("x")))
+        res2: JSONResponse = asyncio.run(unhandled_error_handler(req, Exception("x")))
         self.assertEqual(res2.status_code, 500)
 
     def test_logging_formatter_and_middleware(self) -> None:
@@ -70,5 +69,5 @@ class TestErrorsLogging(unittest.TestCase):
         scope2["query_string"] = b""
         scope2["headers"] = []
         req = Request(scope2)
-        resp = asyncio.get_event_loop().run_until_complete(mdl.dispatch(req, call_next))
+        resp = asyncio.run(mdl.dispatch(req, call_next))
         self.assertEqual(resp.status_code, 200)
