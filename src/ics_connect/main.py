@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import __version__
 from .errors import AppError, app_error_handler, unhandled_error_handler
-from .logging import RequestLoggingMiddleware, setup_logging
+from .logging import RequestLoggingMiddleware, get_logger, setup_logging
 from .middleware.rate_limit import RateLimiter, RateLimitMiddleware
 from .routers import events_router, health_router, search_router
 from .settings import Settings
@@ -16,6 +16,13 @@ def create_app() -> FastAPI:
     settings = Settings.from_env()
 
     app = FastAPI(title="ICS Connect API", version=__version__)
+
+    # Startup repo-mode log (sql vs memory) based on env
+    import os
+
+    logger = get_logger("ics_connect.startup")
+    mode = "sql" if os.environ.get("DATABASE_URL") else "memory"
+    logger.info(f"startup repo={mode}")
 
     # Middleware (rate limit first, then logging)
     limiter = RateLimiter(
