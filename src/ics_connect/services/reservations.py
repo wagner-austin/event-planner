@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime as dt
 from dataclasses import dataclass
 
 from ..errors import AppError
@@ -66,5 +65,6 @@ class ReservationService:
         nxt = self._repos.reservations.find_oldest_waitlisted(event_id)
         if nxt is not None:
             nxt.status = ReservationStatus.CONFIRMED
-            nxt.promoted_at = dt.datetime.utcnow()
+            from ..util.time import utcnow
+            nxt.promoted_at = utcnow()
             self._repos.reservations.update(nxt)
