@@ -17,6 +17,7 @@ psycopg2-binary = "^2.9.9"
 pydantic-settings = "^2.5.2"
 PyJWT = "^2.9.0"
 argon2-cffi = "^23.1.0"
+typing-extensions = "^4.12.2"
 slowapi = "^0.1.9"
 
 [tool.poetry.group.dev.dependencies]
