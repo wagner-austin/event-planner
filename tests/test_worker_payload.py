@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import unittest
 
-from ics_worker.payload import build_create_payload, iso_now_plus
+from ics_worker.payload import build_create_payload, iso_now_plus, to_json_create_payload
 
 
 class TestWorkerPayload(unittest.TestCase):
@@ -22,9 +22,10 @@ class TestWorkerPayload(unittest.TestCase):
             "tags": ["a", "b"],
         }
         payload = build_create_payload(body)
-        self.assertEqual(payload["title"], "T")
+        jsonp = to_json_create_payload(payload)
+        self.assertEqual(jsonp["title"], "T")
+        self.assertIsInstance(jsonp["starts_at"], str)
 
     def test_iso_now_plus(self) -> None:
         iso = iso_now_plus(1)
         self.assertIn("T", iso)
-

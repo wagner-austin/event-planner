@@ -4,8 +4,6 @@ from dataclasses import dataclass
 
 import httpx
 
-from ics_connect.types import CreateEventBody
-
 from .config import WorkerConfig
 
 
@@ -16,7 +14,7 @@ class BotAPIClient:
     def _headers(self) -> dict[str, str]:
         return {"X-Bot-Key": self.config.bot_key}
 
-    def create_event(self, payload: CreateEventBody) -> dict[str, object]:
+    def create_event(self, payload: dict[str, object]) -> dict[str, object]:
         url = f"{self.config.api_url}/bot/events"
         with httpx.Client(timeout=10.0) as client:
             r = client.post(url, headers=self._headers(), json=payload)

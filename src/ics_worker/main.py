@@ -7,7 +7,7 @@ from discord import app_commands
 
 from ics_worker.client import BotAPIClient
 from ics_worker.config import WorkerConfig
-from ics_worker.payload import build_create_payload, iso_now_plus
+from ics_worker.payload import build_create_payload, iso_now_plus, to_json_create_payload
 
 
 class BotApp(discord.Client):
@@ -38,8 +38,9 @@ class BotApp(discord.Client):
                 "tags": [],
             }
             try:
-                payload = build_create_payload(body)
-                resp = self.api.create_event(payload)
+                payload_typed = build_create_payload(body)
+                json_payload = to_json_create_payload(payload_typed)
+                resp = self.api.create_event(json_payload)
                 eid = str(resp.get("event_id", ""))
                 await interaction.response.send_message(
                     f"Event created: {title} (id={eid})",

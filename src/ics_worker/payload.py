@@ -55,5 +55,28 @@ def iso_now_plus(hours: int) -> str:
     return (now + dt.timedelta(hours=hours)).isoformat()
 
 
-__all__ = ["EventCreateOptions", "build_create_payload", "iso_now_plus"]
+def to_json_create_payload(payload: CreateEventBody) -> dict[str, object]:
+    """Convert a typed CreateEventBody (with datetimes) into a JSON-serializable dict.
 
+    Ensures no datetime objects are sent over the wire.
+    """
+    return {
+        "title": payload["title"],
+        "description": payload["description"],
+        "type": payload["type"],
+        "starts_at": payload["starts_at"].isoformat(),
+        "ends_at": payload["ends_at"].isoformat(),
+        "location_text": payload["location_text"],
+        "capacity": payload["capacity"],
+        "public": payload["public"],
+        "requires_join_code": payload["requires_join_code"],
+        "tags": payload["tags"],
+    }
+
+
+__all__ = [
+    "EventCreateOptions",
+    "build_create_payload",
+    "iso_now_plus",
+    "to_json_create_payload",
+]
