@@ -11,6 +11,7 @@ from ics_connect.endpoints import (
     my_reservation_ep,
     reserve_ep,
 )
+from ics_connect.repositories.inmemory import InMemoryRepos
 from ics_connect.types import CreateEventBody, ReserveBody
 
 
@@ -32,16 +33,17 @@ def make_body(now: dt.datetime) -> CreateEventBody:
 class TestAPI(unittest.TestCase):
     def setUp(self) -> None:
         self.store = Store()
+        self.repos = InMemoryRepos(self.store)
 
     def test_event_create_get_and_reserve_flow(self) -> None:
         now = dt.datetime.utcnow()
         body = make_body(now)
-        created = create_event_ep(body, self.store)
+        created = create_event_ep(body, self.repos)
         event = created["event"]
         event_id: str = event["id"]
         self.assertEqual(event["title"], body["title"]) 
 
-        got = get_event_ep(event_id, self.store)
+        got = get_event_ep(event_id, self.repos)
         self.assertEqual(got["id"], event_id)
 
         # Reserve first attendee (confirmed)
@@ -50,21 +52,23 @@ class TestAPI(unittest.TestCase):
             "email": "ana@uci.edu",
             "join_code": None,
         }
-        reserve = reserve_ep(event_id, reserve_body, self.store)
+        reserve = reserve_ep(event_id, reserve_body, self.repos)
         token: str = reserve["token"]
         reservation = reserve["reservation"]
         self.assertEqual(reservation["status"], "confirmed")
 
         # Check my reservation
-        mine = my_reservation_ep(event_id, token, self.store)
+        mine = my_reservation_ep(event_id, token, self.repos)
         self.assertEqual(mine["id"], reservation["id"]) 
 
         # Second attendee should be waitlisted due to capacity
         reserve2 = reserve_ep(
-            event_id, {"display_name": "Ben", "email": "ben@uci.edu", "join_code": None}, self.store
+            event_id,
+            {"display_name": "Ben", "email": "ben@uci.edu", "join_code": None},
+            self.repos,
         )
         self.assertEqual(reserve2["reservation"]["status"], "waitlisted")
 
         # Cancel first; second should be promoted automatically
-        cancel = cancel_my_reservation_ep(event_id, token, self.store)
+        cancel = cancel_my_reservation_ep(event_id, token, self.repos)
         self.assertEqual(cancel["status"], "canceled")
