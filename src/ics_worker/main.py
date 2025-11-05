@@ -56,7 +56,7 @@ class BotApp(discord.Client):
                 rjc = "yes" if bool(resp.get("requires_join_code", False)) else "no"
                 emb.add_field(name="Privacy", value=f"{privacy}, join code: {rjc}", inline=True)
                 emb.set_footer(text=f"Event ID: {eid}")
-                await interaction.response.send_message(embed=emb, ephemeral=True)
+                await interaction.response.send_message(embed=emb, ephemeral=False)
             except Exception as e:
                 await interaction.response.send_message(
                     f"Failed to create event: {e}", ephemeral=True
