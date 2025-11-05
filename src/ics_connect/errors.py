@@ -17,8 +17,12 @@ def error_envelope(code: str, message: str, details: object | None = None) -> di
     return {"error": {"code": code, "message": message, "details": det}}
 
 
-async def app_error_handler(_request: Request, exc: AppError) -> JSONResponse:
-    return JSONResponse(status_code=400, content=error_envelope(exc.code, exc.message, exc.details))
+async def app_error_handler(_request: Request, exc: Exception) -> JSONResponse:
+    if isinstance(exc, AppError):
+        return JSONResponse(
+            status_code=400, content=error_envelope(exc.code, exc.message, exc.details)
+        )
+    return JSONResponse(status_code=400, content=error_envelope("APP_ERROR", str(exc)))
 
 
 async def unhandled_error_handler(_request: Request, exc: Exception) -> JSONResponse:
