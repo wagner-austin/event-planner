@@ -4,15 +4,18 @@ import datetime as dt
 from dataclasses import dataclass
 from typing import Final
 
-from .db import Store
 from .errors import AppError
-from .models import Event, ReservationStatus
+from .models import Event
+from .repositories.protocols import Repos
 from .services.events import CreateEventInput, EventService
 from .services.reservations import ReservationService, ReserveInput
 from .types import (
+    AuthResponse,
     CreatedEventResponse,
     CreateEventBody,
     EventPublic,
+    ProfileBody,
+    ProfileOut,
     ReservationOut,
     ReserveBody,
     ReserveResponse,
@@ -38,8 +41,8 @@ def to_public(ev: Event, confirmed: int, waitlisted: int) -> EventPublic:
     }
 
 
-def create_event_ep(body: CreateEventBody, store: Store) -> CreatedEventResponse:
-    svc = EventService(store)
+def create_event_ep(body: CreateEventBody, repos: Repos) -> CreatedEventResponse:
+    svc = EventService(repos)
     created = svc.create(
         CreateEventInput(
             title=body["title"],
@@ -63,28 +66,20 @@ def create_event_ep(body: CreateEventBody, store: Store) -> CreatedEventResponse
     return resp
 
 
-def get_event_ep(event_id: str, store: Store) -> EventPublic:
-    ev = store.events.get(event_id)
+def get_event_ep(event_id: str, repos: Repos) -> EventPublic:
+    ev = repos.events.get(event_id)
     if ev is None:
         raise AppError("NOT_FOUND", "Event not found")
-    confirmed = sum(
-        1
-        for r in store.reservations.values()
-        if r.event_id == event_id and r.status == ReservationStatus.CONFIRMED
-    )
-    waitlisted = sum(
-        1
-        for r in store.reservations.values()
-        if r.event_id == event_id and r.status == ReservationStatus.WAITLISTED
-    )
+    confirmed = repos.reservations.count_confirmed(event_id)
+    waitlisted = repos.reservations.count_waitlisted(event_id)
     return to_public(ev, int(confirmed), int(waitlisted))
 
 
-def reserve_ep(event_id: str, body: ReserveBody, store: Store) -> ReserveResponse:
-    ev = store.events.get(event_id)
+def reserve_ep(event_id: str, body: ReserveBody, repos: Repos) -> ReserveResponse:
+    ev = repos.events.get(event_id)
     if ev is None:
         raise AppError("NOT_FOUND", "Event not found")
-    svc = ReservationService(store)
+    svc = ReservationService(repos)
     result = svc.reserve(
         ev,
         ReserveInput(
@@ -104,13 +99,13 @@ def reserve_ep(event_id: str, body: ReserveBody, store: Store) -> ReserveRespons
     return resp
 
 
-def my_reservation_ep(event_id: str, token: str, store: Store) -> ReservationOut:
+def my_reservation_ep(event_id: str, token: str, repos: Repos) -> ReservationOut:
     from .util.jwt import decode_token
 
     claims = decode_token(token)
     rid_obj = claims.get("sub")
     rid = str(rid_obj)
-    r = store.reservations.get(rid)
+    r = repos.reservations.get(rid)
     if r is None or r.event_id != event_id:
         raise AppError("NOT_FOUND", "Reservation not found")
     out: ReservationOut = {
@@ -123,13 +118,13 @@ def my_reservation_ep(event_id: str, token: str, store: Store) -> ReservationOut
     return out
 
 
-def cancel_my_reservation_ep(event_id: str, token: str, store: Store) -> dict[str, str]:
+def cancel_my_reservation_ep(event_id: str, token: str, repos: Repos) -> dict[str, str]:
     from .util.jwt import decode_token
 
     claims = decode_token(token)
     rid_obj = claims.get("sub")
     rid = str(rid_obj)
-    svc = ReservationService(store)
+    svc = ReservationService(repos)
     svc.cancel_and_maybe_promote(event_id, rid)
     return {"status": "canceled"}
 
@@ -143,8 +138,8 @@ class SearchParams:
     offset: int
 
 
-def search_ep(params: SearchParams, store: Store) -> SearchResult:
-    events = list(store.events.values())
+def search_ep(params: SearchParams, repos: Repos) -> SearchResult:
+    events = repos.events.list_all()
     if params.q:
         ql = params.q.lower()
         events = [
@@ -168,3 +163,36 @@ OK_RESPONSE: Final[dict[str, bool]] = {"ok": True}
 
 def health_ep() -> dict[str, bool]:
     return OK_RESPONSE
+
+
+# Auth/profile (stateless)
+
+def _profile_id_from_email(email: str) -> str:
+    import uuid
+
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, email.lower().strip()))
+
+
+def login_ep(body: ProfileBody) -> AuthResponse:
+    from .util.jwt import encode_token
+
+    email = body["email"].strip()
+    display_name = body["display_name"].strip()
+    if "@" not in email or not display_name:
+        raise AppError("INVALID_INPUT", "email and display_name required")
+    pid = _profile_id_from_email(email)
+    token = encode_token({"sub": pid, "email": email, "name": display_name})
+    profile: ProfileOut = {"id": pid, "email": email, "display_name": display_name}
+    return {"profile": profile, "token": token}
+
+
+def me_ep(token: str) -> ProfileOut:
+    from .util.jwt import decode_token
+
+    claims = decode_token(token)
+    pid = str(claims.get("sub"))
+    email = str(claims.get("email"))
+    name = str(claims.get("name"))
+    if not pid or not email or not name:
+        raise AppError("UNAUTHORIZED", "Invalid token")
+    return {"id": pid, "email": email, "display_name": name}
