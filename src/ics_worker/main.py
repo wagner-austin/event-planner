@@ -16,6 +16,7 @@ class BotApp(discord.Client):
         self.cfg: Final = cfg
         self.tree = app_commands.CommandTree(self)
         self.api = BotAPIClient(cfg)
+        self._last_event_by_user: dict[int, str] = {}
 
         @self.tree.command(name="event_create", description="Create an event (defaults now+1h/2h)")
         @app_commands.describe(title="Title only; defaults used for other fields")
@@ -42,25 +43,52 @@ class BotApp(discord.Client):
                 json_payload = to_json_create_payload(payload_typed)
                 resp = self.api.create_event(json_payload)
                 eid = str(resp.get("event_id", ""))
-                await interaction.response.send_message(
-                    f"Event created: {title} (id={eid})",
-                    ephemeral=True,
-                )
+                # Cache last event for user
+                self._last_event_by_user[interaction.user.id] = eid
+                # Build a nice embed
+                emb = discord.Embed(title="Event Created", description=resp.get("title", ""))
+                emb.add_field(name="Starts", value=str(resp.get("starts_at", "")), inline=True)
+                emb.add_field(name="Ends", value=str(resp.get("ends_at", "")), inline=True)
+                loc = resp.get("location_text", None)
+                emb.add_field(name="Location", value=str(loc or "(none)"), inline=False)
+                emb.add_field(name="Capacity", value=str(resp.get("capacity", 0)), inline=True)
+                privacy = "public" if bool(resp.get("public", False)) else "private"
+                rjc = "yes" if bool(resp.get("requires_join_code", False)) else "no"
+                emb.add_field(name="Privacy", value=f"{privacy}, join code: {rjc}", inline=True)
+                emb.set_footer(text=f"Event ID: {eid}")
+                await interaction.response.send_message(embed=emb, ephemeral=True)
             except Exception as e:
                 await interaction.response.send_message(
                     f"Failed to create event: {e}", ephemeral=True
                 )
                 raise
 
-        @self.tree.command(name="status", description="Show RSVP counts for an event by id")
-        @app_commands.describe(event_id="Event ID")
+        async def _auto_status(
+            _interaction: discord.Interaction, current: str
+        ) -> list[app_commands.Choice[str]]:
+            items = self.api.search_events(current)
+            out: list[app_commands.Choice[str]] = []
+            for it in items:
+                label = f"{it['title']} · {it['starts_at']}"
+                out.append(app_commands.Choice(name=label, value=it["id"]))
+            return out
+
+        @self.tree.command(name="status", description="Show RSVP counts for an event")
+        @app_commands.describe(event_id="Pick from suggestions or leave empty for last created")
+        @app_commands.autocomplete(event_id=_auto_status)
         async def status(
-            interaction: discord.Interaction, event_id: str
+            interaction: discord.Interaction, event_id: str | None = None
         ) -> None:
             try:
-                counts = self.api.get_event_counts(event_id)
+                eid = event_id or self._last_event_by_user.get(interaction.user.id, "")
+                if not eid:
+                    await interaction.response.send_message(
+                        "Provide event_id or create an event first.", ephemeral=True
+                    )
+                    return
+                counts = self.api.get_event_counts(eid)
                 msg = (
-                    f"Event {event_id}: confirmed={counts['confirmed']}, "
+                    f"Event {eid}: confirmed={counts['confirmed']}, "
                     f"waitlisted={counts['waitlisted']}"
                 )
                 await interaction.response.send_message(msg, ephemeral=True)
