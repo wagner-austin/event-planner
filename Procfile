@@ -1,1 +1,1 @@
-web: uvicorn ics_connect.main:app --host 0.0.0.0 --port ${PORT:-8000}
+web: PYTHONPATH=./src uvicorn ics_connect.main:app --host 0.0.0.0 --port ${PORT:-8000}
