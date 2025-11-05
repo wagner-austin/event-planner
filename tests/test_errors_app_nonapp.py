@@ -21,6 +21,5 @@ class TestErrorsNonApp(unittest.TestCase):
             "headers": [],
         }
         req = Request(scope_typed)
-        loop = asyncio.get_event_loop()
-        resp = loop.run_until_complete(app_error_handler(req, Exception("oops")))
+        resp = asyncio.run(app_error_handler(req, Exception("oops")))
         self.assertEqual(resp.status_code, 400)
