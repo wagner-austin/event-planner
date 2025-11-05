@@ -46,6 +46,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         response: Response | None = None
         try:
             response = await call_next(request)
+            # set request id header
+            response.headers["X-Request-Id"] = request_id
             return response
         finally:
             elapsed_ms = int((time.perf_counter() - start) * 1000)
