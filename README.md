@@ -43,8 +43,36 @@ make test
 - pytest + coverage (target ≥ 85% on src/ics_connect)
 
 ## Environment (dev)
-- API: DATABASE_URL, JWT_SECRET, CORS_ORIGIN, RATE_LIMIT_WRITE, RATE_LIMIT_READ, PORT
-- Bot: DISCORD_BOT_TOKEN, API_URL, BOT_KEY
-- Web: web/config.json sets API_BASE_URL
+- API (env, prefixed with `ICS_`):
+  - `ICS_JWT_SECRET` (required in prod; defaults to `dev-secret` in dev)
+  - `ICS_CORS_ORIGIN` (single origin or omit to allow all in dev)
+  - `ICS_RATE_LIMIT_WRITE` (default 20), `ICS_RATE_LIMIT_READ` (default 60)
+  - `ICS_PORT` (default 8000)
+  - `DATABASE_URL` reserved for future SQL integration
+- Bot: `DISCORD_BOT_TOKEN`, `API_URL`, `BOT_KEY` (future)
+- Web: `web/config.json` sets `API_BASE_URL` (future)
 
 See the design doc for endpoints, data model, and deployment details.
+
+## Docker
+
+Build and run the API locally using Docker Compose:
+
+```
+docker compose build api
+docker compose up api
+# API on http://localhost:8000
+```
+
+Environment overrides:
+
+```
+# Example: set a non-default secret and CORS origin
+$env:ICS_JWT_SECRET = (python - <<<'import hashlib;print(hashlib.sha256(b"local").hexdigest())')
+$env:ICS_CORS_ORIGIN = "https://your-frontend.example"
+docker compose up --build api
+```
+
+## CI
+
+GitHub Actions workflow runs `make check` (lint, type-check, guards, tests with coverage) on PRs and pushes.
