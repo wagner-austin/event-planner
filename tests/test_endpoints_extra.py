@@ -14,12 +14,14 @@ from ics_connect.endpoints import (
     search_ep,
 )
 from ics_connect.errors import AppError
+from ics_connect.repositories.inmemory import InMemoryRepos
 from ics_connect.types import CreateEventBody, ReserveBody, SearchResult
 
 
 class TestEndpointsExtra(unittest.TestCase):
     def setUp(self) -> None:
         self.store = Store()
+        self.repos = InMemoryRepos(self.store)
         now = dt.datetime.utcnow()
         self.body: CreateEventBody = {
             "title": "Alpha",
@@ -33,16 +35,16 @@ class TestEndpointsExtra(unittest.TestCase):
             "requires_join_code": False,
             "tags": [],
         }
-        created = create_event_ep(self.body, self.store)
+        created = create_event_ep(self.body, self.repos)
         self.event_id: str = created["event"]["id"]
 
     def test_get_event_counts_after_reservations(self) -> None:
         # Make one confirmed and one waitlisted
         body_a: ReserveBody = {"display_name": "A", "email": None, "join_code": None}
         body_b: ReserveBody = {"display_name": "B", "email": None, "join_code": None}
-        reserve_ep(self.event_id, body_a, self.store)
-        reserve_ep(self.event_id, body_b, self.store)
-        pub = get_event_ep(self.event_id, self.store)
+        reserve_ep(self.event_id, body_a, self.repos)
+        reserve_ep(self.event_id, body_b, self.repos)
+        pub = get_event_ep(self.event_id, self.repos)
         self.assertEqual(pub["confirmed_count"], 1)
         self.assertEqual(pub["waitlist_count"], 1)
 
@@ -51,10 +53,10 @@ class TestEndpointsExtra(unittest.TestCase):
         expected: dict[str, bool] = {"ok": True}
         self.assertEqual(ok, expected)
         params = SearchParams(q=None, start=None, to=None, limit=10, offset=0)
-        result = search_ep(params=params, store=self.store)
+        result = search_ep(params=params, repos=self.repos)
         self.assertGreaterEqual(result["total"], 1)
         params2 = SearchParams(q=None, start=None, to=None, limit=10, offset=999)
-        result2 = search_ep(params=params2, store=self.store)
+        result2 = search_ep(params=params2, repos=self.repos)
         self.assertEqual(len(result2["events"]), 0)
 
     def test_search_q_and_dates_and_paging(self) -> None:
@@ -71,26 +73,26 @@ class TestEndpointsExtra(unittest.TestCase):
             "public": True,
             "requires_join_code": False,
             "tags": [],
-        }, self.store)
+        }, self.repos)
         params = SearchParams(
             q="alpha", start=now, to=now + dt.timedelta(hours=5), limit=1, offset=0
         )
-        result: SearchResult = search_ep(params=params, store=self.store)
+        result: SearchResult = search_ep(params=params, repos=self.repos)
         self.assertGreaterEqual(result["total"], 1)
         self.assertEqual(len(result["events"]), 1)
 
     def test_my_reservation_invalid_event(self) -> None:
         body_c: ReserveBody = {"display_name": "C", "email": None, "join_code": None}
-        r = reserve_ep(self.event_id, body_c, self.store)
+        r = reserve_ep(self.event_id, body_c, self.repos)
         token: str = r["token"]
         with self.assertRaises(AppError):
-            _ = my_reservation_ep("nonexistent", token, self.store)
+            _ = my_reservation_ep("nonexistent", token, self.repos)
 
     def test_reserve_not_found_event(self) -> None:
         with self.assertRaises(AppError):
             missing_body: ReserveBody = {"display_name": "X", "email": None, "join_code": None}
-            _ = reserve_ep("missing", missing_body, self.store)
+            _ = reserve_ep("missing", missing_body, self.repos)
 
     def test_get_event_not_found(self) -> None:
         with self.assertRaises(AppError):
-            _ = get_event_ep("missing", self.store)
+            _ = get_event_ep("missing", self.repos)
