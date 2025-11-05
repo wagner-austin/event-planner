@@ -85,3 +85,6 @@ GitHub Actions workflow runs `make check` (lint, type-check, guards, tests with 
 - Data: no volumes required. If you set `DATABASE_URL`, ensure your Railway Postgres plugin is attached and the URL is injected.
 - Health: `GET /api/v1/health` returns `{ "ok": true }`.
 
+
+
+Note: When deploying with Railway Railpack (no Dockerfile), this repo includes a Procfile to start FastAPI via uvicorn: web: uvicorn ics_connect.main:app --host 0.0.0.0 --port .
