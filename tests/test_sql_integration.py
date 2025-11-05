@@ -16,7 +16,7 @@ class TestSQLIntegration(unittest.TestCase):
 
     def test_sql_create_reserve_cancel_promote(self) -> None:
         repos = next(provide_repos())
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         ev_svc = EventService(repos)
         created = ev_svc.create(
             CreateEventInput(
