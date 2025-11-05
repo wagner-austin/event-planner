@@ -15,7 +15,7 @@ class TestServices(unittest.TestCase):
     def setUp(self) -> None:
         self.store = Store()
         self.repos = InMemoryRepos(self.store)
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         self.event_service = EventService(self.repos)
         created = self.event_service.create(
             CreateEventInput(
@@ -43,7 +43,7 @@ class TestServices(unittest.TestCase):
         self.assertEqual(promoted.status, ReservationStatus.CONFIRMED)
 
     def test_event_full_results_waitlist(self) -> None:
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         ev2 = self.event_service.create(
             CreateEventInput(
                 title="F",
@@ -63,7 +63,7 @@ class TestServices(unittest.TestCase):
 
     def test_join_code_required_invalid(self) -> None:
         # Create event with join code required
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         created2 = self.event_service.create(
             CreateEventInput(
                 title="J",
