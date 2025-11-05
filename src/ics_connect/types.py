@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import TypedDict
+
+from typing_extensions import TypedDict
 
 
 class Envelope(TypedDict):
@@ -66,3 +67,20 @@ class SearchResult(TypedDict):
     events: list[EventPublic]
     total: int
 
+
+# Auth/profile
+
+class ProfileBody(TypedDict):
+    email: str
+    display_name: str
+
+
+class ProfileOut(TypedDict):
+    id: str
+    email: str
+    display_name: str
+
+
+class AuthResponse(TypedDict):
+    profile: ProfileOut
+    token: str
