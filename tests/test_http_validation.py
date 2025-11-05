@@ -13,7 +13,7 @@ class TestHTTPValidation(unittest.TestCase):
         self.client = TestClient(app)
 
     def test_create_event_invalid_types(self) -> None:
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         # capacity wrong type -> int required
         payload: dict[str, object] = {
             "title": "Bad",
@@ -60,7 +60,7 @@ class TestHTTPValidation(unittest.TestCase):
         self.assertEqual(r5.status_code, 200)
 
     def test_reserve_invalid_join_code_type(self) -> None:
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         # First create a valid event
         payload: dict[str, object] = {
             "title": "Alpha",
