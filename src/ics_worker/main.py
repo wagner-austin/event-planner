@@ -52,6 +52,24 @@ class BotApp(discord.Client):
                 )
                 raise
 
+        @self.tree.command(name="status", description="Show RSVP counts for an event by id")
+        @app_commands.describe(event_id="Event ID")
+        async def status(
+            interaction: discord.Interaction, event_id: str
+        ) -> None:
+            try:
+                counts = self.api.get_event_counts(event_id)
+                msg = (
+                    f"Event {event_id}: confirmed={counts['confirmed']}, "
+                    f"waitlisted={counts['waitlisted']}"
+                )
+                await interaction.response.send_message(msg, ephemeral=True)
+            except Exception as e:
+                await interaction.response.send_message(
+                    f"Failed to get status: {e}", ephemeral=True
+                )
+                raise
+
     async def setup_hook(self) -> None:
         # Sync global commands
         await self.tree.sync()
