@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime as dt
 from dataclasses import dataclass, field
 
+from .util.time import utcnow
+
 
 @dataclass
 class Event:
@@ -20,7 +22,7 @@ class Event:
     admin_key_hash: str
     capacity: int
     waitlist_enabled: bool
-    created_at: dt.datetime = field(default_factory=dt.datetime.utcnow)
+    created_at: dt.datetime = field(default_factory=utcnow)
 
 
 class ReservationStatus:
@@ -38,4 +40,4 @@ class Reservation:
     email: str | None
     status: str
     promoted_at: dt.datetime | None
-    created_at: dt.datetime = field(default_factory=dt.datetime.utcnow)
+    created_at: dt.datetime = field(default_factory=utcnow)
