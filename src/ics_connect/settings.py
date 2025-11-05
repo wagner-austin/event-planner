@@ -18,6 +18,7 @@ class Settings:
     rate_limit_write: int
     rate_limit_read: int
     port: int
+    bot_key: str | None
 
     @staticmethod
     def from_env() -> Settings:
@@ -35,6 +36,7 @@ class Settings:
             rate_limit_write=int(rate_limit_write_raw) if rate_limit_write_raw else 20,
             rate_limit_read=int(rate_limit_read_raw) if rate_limit_read_raw else 60,
             port=int(port_raw) if port_raw else 8000,
+            bot_key=_getenv("BOT_KEY"),
         )
 
 

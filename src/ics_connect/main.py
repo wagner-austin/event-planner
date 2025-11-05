@@ -51,8 +51,9 @@ def create_app() -> FastAPI:
     # Routers (versioned)
     app.include_router(health_router, prefix="/api/v1")
     app.include_router(search_router, prefix="/api/v1")
-    from .routers import auth_router
+    from .routers import auth_router, bot_router
     app.include_router(auth_router, prefix="/api/v1")
+    app.include_router(bot_router, prefix="/api/v1")
     app.include_router(events_router, prefix="/api/v1")
 
     return app

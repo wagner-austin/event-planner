@@ -5,9 +5,11 @@ __all__ = [
     "search_router",
     "health_router",
     "auth_router",
+    "bot_router",
 ]
 
 from .auth import router as auth_router
+from .bot import router as bot_router
 from .events import router as events_router
 from .health import router as health_router
 from .search import router as search_router
