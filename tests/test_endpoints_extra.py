@@ -22,7 +22,7 @@ class TestEndpointsExtra(unittest.TestCase):
     def setUp(self) -> None:
         self.store = Store()
         self.repos = InMemoryRepos(self.store)
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         self.body: CreateEventBody = {
             "title": "Alpha",
             "description": None,
@@ -60,7 +60,7 @@ class TestEndpointsExtra(unittest.TestCase):
         self.assertEqual(len(result2["events"]), 0)
 
     def test_search_q_and_dates_and_paging(self) -> None:
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         # second event not matching title
         create_event_ep({
             "title": "Beta",
