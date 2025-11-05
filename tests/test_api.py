@@ -36,7 +36,7 @@ class TestAPI(unittest.TestCase):
         self.repos = InMemoryRepos(self.store)
 
     def test_event_create_get_and_reserve_flow(self) -> None:
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         body = make_body(now)
         created = create_event_ep(body, self.repos)
         event = created["event"]
