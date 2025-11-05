@@ -190,9 +190,13 @@ def me_ep(token: str) -> ProfileOut:
     from .util.jwt import decode_token
 
     claims = decode_token(token)
-    pid = str(claims.get("sub"))
-    email = str(claims.get("email"))
-    name = str(claims.get("name"))
-    if not pid or not email or not name:
+    pid_raw = claims.get("sub")
+    email_raw = claims.get("email")
+    name_raw = claims.get("name")
+    if not isinstance(pid_raw, str) or not pid_raw.strip():
         raise AppError("UNAUTHORIZED", "Invalid token")
-    return {"id": pid, "email": email, "display_name": name}
+    if not isinstance(email_raw, str) or not email_raw.strip():
+        raise AppError("UNAUTHORIZED", "Invalid token")
+    if not isinstance(name_raw, str) or not name_raw.strip():
+        raise AppError("UNAUTHORIZED", "Invalid token")
+    return {"id": pid_raw, "email": email_raw, "display_name": name_raw}
