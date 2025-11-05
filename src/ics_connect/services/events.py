@@ -3,8 +3,8 @@ from __future__ import annotations
 import datetime as dt
 from dataclasses import dataclass
 
-from ..db import Store
 from ..models import Event
+from ..repositories.protocols import Repos
 from ..util.hashing import hash_secret
 from ..util.ids import new_uuid
 
@@ -30,8 +30,8 @@ class CreatedEvent:
 
 
 class EventService:
-    def __init__(self, store: Store) -> None:
-        self._store = store
+    def __init__(self, repos: Repos) -> None:
+        self._repos = repos
 
     def create(self, data: CreateEventInput) -> CreatedEvent:
         admin_key_raw = new_uuid().replace("-", "")
@@ -54,5 +54,5 @@ class EventService:
             capacity=data.capacity,
             waitlist_enabled=True,
         )
-        self._store.events[ev.id] = ev
+        self._repos.events.create(ev)
         return CreatedEvent(event=ev, join_code=join_code_raw, admin_key=admin_key_raw)
