@@ -14,7 +14,7 @@ class TestHTTPAPI(unittest.TestCase):
         self.client = TestClient(app)
 
     def test_http_create_get_reserve_cancel_flow(self) -> None:
-        now = dt.datetime.utcnow()
+        now = dt.datetime.now(dt.UTC)
         payload = {
             "title": "HTTP Alpha",
             "description": "Bring snacks",
