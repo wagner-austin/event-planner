@@ -5,29 +5,46 @@ import unittest
 from fastapi.testclient import TestClient
 
 from ics_connect.main import app
+from ics_connect.util.jwt import encode_token
 
 
 class TestAuth(unittest.TestCase):
     def setUp(self) -> None:
         self.client = TestClient(app)
 
-    def test_login_and_me(self) -> None:
-        body: dict[str, str] = {"email": "user@uci.edu", "display_name": "User"}
-        r = self.client.post("/api/v1/auth/login", json=body)
-        self.assertEqual(r.status_code, 200)
-        self.assertIn("\"token\"", r.text)
-        token_start = r.text.find('"token":"')
-        self.assertGreaterEqual(token_start, 0)
-        token_start += len('"token":"')
-        token_end = r.text.find('"', token_start)
-        token = r.text[token_start:token_end]
-        r2 = self.client.get(
-            "/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}
-        )
-        self.assertEqual(r2.status_code, 200)
-
-    def test_login_invalid(self) -> None:
-        bad: dict[str, str] = {"email": "no-at", "display_name": ""}
-        r = self.client.post("/api/v1/auth/login", json=bad)
+    def test_auth_me_missing_header(self) -> None:
+        r = self.client.get("/api/v1/auth/me")
         self.assertEqual(r.status_code, 400)
 
+    def test_auth_me_invalid_claims(self) -> None:
+        # Token missing required "name" claim
+        token = encode_token({"sub": "user-1", "email": "u@example.com"})
+        r = self.client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(r.status_code, 400)
+
+    def test_auth_me_missing_sub(self) -> None:
+        token = encode_token({"email": "u@example.com", "name": "User"})
+        r = self.client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(r.status_code, 400)
+
+    def test_auth_me_missing_email(self) -> None:
+        token = encode_token({"sub": "user-1", "name": "User"})
+        r = self.client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(r.status_code, 400)
+
+    def test_auth_login_routes(self) -> None:
+        # Valid login
+        ok_body: dict[str, object] = {"email": "u@example.com", "display_name": "User"}
+        r1 = self.client.post("/api/v1/auth/login", json=ok_body)
+        self.assertEqual(r1.status_code, 200)
+        self.assertIn("\"token\":", r1.text)
+
+        # Invalid login (bad email)
+        bad_body: dict[str, object] = {"email": "userexample.com", "display_name": "User"}
+        r2 = self.client.post("/api/v1/auth/login", json=bad_body)
+        self.assertEqual(r2.status_code, 400)
+
+    def test_auth_me_success(self) -> None:
+        token = encode_token({"sub": "user-1", "email": "u@example.com", "name": "User"})
+        r = self.client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(r.status_code, 200)
