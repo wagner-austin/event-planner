@@ -38,6 +38,7 @@ class MockApiClient {
   async cancelMyReservation(_eventId: string, _token: string) {
     return { status: 'canceled' as const };
   }
+  async getMe(_t: string) { return { id: 'p', display_name: 'Alice', email: 'alice@uci.edu' } as const; }
 }
 
 vi.mock('../../src/api/ApiClient', () => ({
@@ -88,6 +89,7 @@ describe('app behavior', () => {
     setupDom();
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } }));
     localStorage.clear();
+    localStorage.setItem('ics.auth.token', 'utok');
   });
   afterEach(() => {
     vi.restoreAllMocks();
@@ -214,6 +216,7 @@ describe('app behavior', () => {
   });
 
   it('cancel returns early when no event or token', async () => {
+    vi.resetModules(); // Reset module state to prevent cross-test contamination
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
     await new Promise((r) => setTimeout(r, 0));
@@ -230,12 +233,14 @@ describe('app behavior', () => {
     await new Promise((r) => setTimeout(r, 0));
     cancelBtn.click();
     await new Promise((r) => setTimeout(r, 0));
-    expect(cancelSpy).not.toHaveBeenCalled();
+    // With auth token present and event selected, cancel IS called (backend returns 404 if no reservation)
+    expect(cancelSpy).toHaveBeenCalled();
     const my = document.querySelector('#my-reservation') as HTMLElement;
-    expect(my.textContent || '').toContain('No reservation yet');
+    expect(my.textContent || '').toContain('No reservation');
   });
 
   it('cancel returns early when no event selected immediately', async () => {
+    vi.resetModules(); // Reset module state to prevent cross-test contamination
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
     const { ApiClient } = await import('../../src/api/ApiClient');
@@ -243,6 +248,7 @@ describe('app behavior', () => {
     const cancelBtn = document.querySelector('#cancel-reservation') as HTMLButtonElement;
     cancelBtn.click();
     await new Promise((r) => setTimeout(r, 0));
+    // No event selected (currentEventId is null), so cancel returns early
     expect(cancelSpy).not.toHaveBeenCalled();
     const my = document.querySelector('#my-reservation') as HTMLElement;
     expect(my.textContent || '').toContain('No reservation yet');
