@@ -43,6 +43,20 @@ class BotAPIClient:
                 raise RuntimeError(f"API error {r.status_code}: {r.text}")
             return self._parse_event_counts(r.text)
 
+    def get_event_detail(self, event_id: str) -> dict[str, object]:
+        url = f"{self.config.api_url}/events/{event_id}"
+        with httpx.Client(timeout=10.0) as client:
+            r = client.get(url, headers=self._headers())
+            if r.status_code != httpx.codes.OK:
+                raise RuntimeError(f"API error {r.status_code}: {r.text}")
+            summary = self._parse_event_summary(r.text)
+            counts = self._parse_event_counts(r.text)
+            summary.update({
+                "confirmed": counts["confirmed"],
+                "waitlisted": counts["waitlisted"],
+            })
+            return summary
+
     @staticmethod
     def _parse_event_summary(text: str) -> dict[str, object]:
         def _m(pat: str) -> str:
