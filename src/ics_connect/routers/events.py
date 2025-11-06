@@ -49,9 +49,31 @@ def get_event(event_id: str, store: StoreDep) -> EventPublic:
     return get_event_ep(event_id, store)
 
 
-def reserve(event_id: str, body: dict[str, object], store: StoreDep) -> ReserveResponseTD:
-    payload = _parse_reserve_body(body)
-    return reserve_ep(event_id, payload, store)
+def reserve(
+    event_id: str,
+    body: dict[str, object],
+    store: StoreDep,
+    authorization: AuthHeader = None,
+) -> ReserveResponseTD:
+    token = _parse_bearer_token(authorization)
+    from ..util.jwt import decode_token
+
+    claims = decode_token(token)
+    sub = claims.get("sub")
+    name_raw = claims.get("name")
+    email_raw = claims.get("email")
+    user_id = str(sub) if isinstance(sub, str) and sub else None
+    if user_id is None or not isinstance(email_raw, str) or not email_raw.strip():
+        raise AppError("UNAUTHORIZED", "Invalid token")
+    display_name = name_raw if isinstance(name_raw, str) else ""
+    # Only join_code is taken from the body; name/email come from the token
+    join_code = get_optional_str(body, "join_code")
+    payload: ReserveBody = {
+        "display_name": display_name,
+        "email": email_raw.strip(),
+        "join_code": join_code,
+    }
+    return reserve_ep(event_id, payload, store, user_id)
 
 
 def _parse_bearer_token(authorization: str | None) -> str:
@@ -82,6 +104,8 @@ def _parse_create_event_body(data: dict[str, object]) -> CreateEventBody:
 
 
 def _parse_reserve_body(data: dict[str, object]) -> ReserveBody:
+    # Legacy parser retained for completeness; not used by HTTP now that
+    # Authorization is required. Kept to avoid breaking imports elsewhere.
     display_name = require_str(data, "display_name")
     email = get_optional_str(data, "email")
     join_code = get_optional_str(data, "join_code")
