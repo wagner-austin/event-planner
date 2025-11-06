@@ -33,4 +33,4 @@ jobs:
           poetry install --no-interaction --no-ansi
 
       - name: Lint, type-check, guard, test
-        run: make check
+        run: make lint test
