@@ -35,6 +35,18 @@ class ReservationRepository(Protocol):
     def find_oldest_waitlisted(self, event_id: str) -> Reservation | None:  # pragma: no cover
         raise NotImplementedError
 
+    def find_active_by_event_and_user(
+        self, event_id: str, user_id: str
+    ) -> Reservation | None:  # pragma: no cover
+        """Return an existing non-canceled reservation for the event by user id, if any."""
+        raise NotImplementedError
+
+    def find_active_by_event_and_email(
+        self, event_id: str, email: str
+    ) -> Reservation | None:  # pragma: no cover
+        """Return an existing non-canceled reservation for the event by email, if any."""
+        raise NotImplementedError
+
 
 class Repos(Protocol):
     @property
@@ -47,4 +59,3 @@ class Repos(Protocol):
 
 
 __all__ = ["EventRepository", "ReservationRepository", "Repos"]
-
