@@ -6,6 +6,7 @@ import unittest
 from ics_connect.db import Store
 from ics_connect.endpoints import (
     SearchParams,
+    cancel_my_reservation_ep,
     create_event_ep,
     get_event_ep,
     health_ep,
@@ -96,3 +97,48 @@ class TestEndpointsExtra(unittest.TestCase):
     def test_get_event_not_found(self) -> None:
         with self.assertRaises(AppError):
             _ = get_event_ep("missing", self.repos)
+
+    def test_my_reservation_invalid_token_no_user_id(self) -> None:
+        """Test my_reservation_ep with token containing invalid user_id (line 127)."""
+        from ics_connect.util.jwt import encode_token
+
+        # Token with non-string sub
+        bad_token1 = encode_token({"sub": 123, "email": "test@uci.edu", "name": "Test"})
+        with self.assertRaises(AppError) as ctx1:
+            my_reservation_ep(self.event_id, bad_token1, self.repos)
+        self.assertEqual(ctx1.exception.code, "UNAUTHORIZED")
+
+        # Token with empty string sub
+        bad_token2 = encode_token({"sub": "", "email": "test@uci.edu", "name": "Test"})
+        with self.assertRaises(AppError) as ctx2:
+            my_reservation_ep(self.event_id, bad_token2, self.repos)
+        self.assertEqual(ctx2.exception.code, "UNAUTHORIZED")
+
+        # Token with whitespace-only sub
+        bad_token3 = encode_token({"sub": "   ", "email": "test@uci.edu", "name": "Test"})
+        with self.assertRaises(AppError) as ctx3:
+            my_reservation_ep(self.event_id, bad_token3, self.repos)
+        self.assertEqual(ctx3.exception.code, "UNAUTHORIZED")
+
+    def test_cancel_my_reservation_invalid_token(self) -> None:
+        """Test cancel_my_reservation_ep with invalid token (line 164)."""
+        from ics_connect.util.jwt import encode_token
+
+        # Token with invalid user_id
+        bad_token = encode_token({"sub": None, "email": "test@uci.edu", "name": "Test"})
+        with self.assertRaises(AppError) as ctx:
+            cancel_my_reservation_ep(self.event_id, bad_token, self.repos)
+        self.assertEqual(ctx.exception.code, "UNAUTHORIZED")
+
+    def test_cancel_my_reservation_not_found(self) -> None:
+        """Test cancel_my_reservation_ep when user has no reservation (line 170)."""
+        from ics_connect.util.jwt import encode_token
+
+        # Create valid auth token for user with no reservation
+        user_id = "user-no-reservation"
+        auth_token = encode_token({"sub": user_id, "email": "norsvp@uci.edu", "name": "No RSVP"})
+
+        # Try to cancel when no reservation exists
+        with self.assertRaises(AppError) as ctx:
+            cancel_my_reservation_ep(self.event_id, auth_token, self.repos)
+        self.assertEqual(ctx.exception.code, "NOT_FOUND")
