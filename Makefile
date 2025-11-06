@@ -1,4 +1,4 @@
-.PHONY: lint test check start stop clean install lock
+.PHONY: lint test check start stop clean install lock serve
 
 POETRY ?= poetry
 
@@ -30,3 +30,11 @@ stop:
 clean:
 	docker compose down -v --rmi local --remove-orphans || true
 	docker compose build --no-cache || true
+
+serve:
+	@echo "Opening test-frontend.html in browser..."
+	@python -c "import webbrowser; webbrowser.open('test-frontend.html')"
+	@echo ""
+	@echo "Starting local server on http://localhost:8080"
+	@echo "Press Ctrl+C to stop"
+	@python -m http.server 8080
