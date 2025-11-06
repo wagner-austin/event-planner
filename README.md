@@ -129,5 +129,4 @@ GitHub Actions workflow runs `make check` (lint, type-check, guards, tests with 
 - Health: `GET /api/v1/health` returns `{ "ok": true }`.
 
 
-
 Note: When deploying with Railway Railpack (no Dockerfile), this repo includes a Procfile to start FastAPI via uvicorn: web: uvicorn ics_connect.main:app --host 0.0.0.0 --port .
