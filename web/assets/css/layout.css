@@ -1,0 +1,18 @@
+﻿.container { width: 100%; max-width: 960px; margin: 0 auto; padding: 1rem; }
+.site-header { background: var(--surface); border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+.site-title { margin: 0; font-size: 1.25rem; }
+.site-header .container { display: flex; align-items: center; justify-content: space-between; }
+.site-nav a { color: var(--text); margin-left: 0.5rem; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; }
+.banner { border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem; }
+.banner--error { background: #2b1616; border: 1px solid #5b2a2a; color: #ffd3d3; }
+.list { display: grid; gap: 0.75rem; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .list { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1024px) { .list { grid-template-columns: 1fr 1fr 1fr; } }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; align-items: center; }
+.form-grid label { grid-column: span 1; }
+.form-grid input, .form-grid select { grid-column: span 1; }
+.form-grid .btn { grid-column: 1 / -1; justify-self: start; }
+.actions { display: flex; justify-content: center; padding: 0.5rem; }
