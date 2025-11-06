@@ -16,7 +16,6 @@ from ..validation import (
     parse_datetime,
     parse_string_list,
     require_bool,
-    require_int,
     require_str,
 )
 
@@ -39,6 +38,14 @@ BotGuard = Annotated[None, Depends(_require_bot)]
 def _parse_create_event_body(data: dict[str, object]) -> CreateEventBody:
     starts_at_raw = require_str(data, "starts_at")
     ends_at_raw = require_str(data, "ends_at")
+    # Parse capacity with default of 10
+    capacity_raw = data.get("capacity", 10)
+    if isinstance(capacity_raw, int):
+        capacity = capacity_raw
+    elif isinstance(capacity_raw, str) and capacity_raw.isdigit():
+        capacity = int(capacity_raw)
+    else:
+        capacity = 10
     payload: CreateEventBody = {
         "title": require_str(data, "title"),
         "description": get_optional_str(data, "description"),
@@ -46,7 +53,7 @@ def _parse_create_event_body(data: dict[str, object]) -> CreateEventBody:
         "starts_at": parse_datetime(starts_at_raw, "starts_at"),
         "ends_at": parse_datetime(ends_at_raw, "ends_at"),
         "location_text": get_optional_str(data, "location_text"),
-        "capacity": require_int(data, "capacity"),
+        "capacity": capacity,
         "public": require_bool(data, "public"),
         "requires_join_code": require_bool(data, "requires_join_code"),
         "tags": parse_string_list(data, "tags"),
