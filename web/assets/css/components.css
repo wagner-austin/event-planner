@@ -1,0 +1,4 @@
+﻿.card__title { font-size: 1.05rem; margin: 0 0 0.25rem 0; }
+.card__meta { color: var(--muted); font-size: 0.9rem; }
+.card__desc { margin-top: 0.5rem; color: var(--text); }
+.tag { display: inline-block; padding: 0.15rem 0.5rem; background: #1f2937; color: #d1d5db; border-radius: 999px; font-size: 0.75rem; margin-right: 0.25rem; }
