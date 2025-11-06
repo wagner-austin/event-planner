@@ -24,6 +24,7 @@ make test
 - `make lint`  → poetry lock + install, ruff (fix), mypy --strict, yamllint, guard scripts
 - `make test`  → poetry install, pytest with coverage (term + XML)
 - `make check` → lint + test
+- `make serve` → open test-frontend.html + start local HTTP server on :8080
 - `make start` → docker compose up (db optional, api) with build
 - `make stop`  → docker compose stop
 - `make clean` → stop, remove volumes/images, rebuild
@@ -53,6 +54,40 @@ make test
 - Web: `web/config.json` sets `API_BASE_URL`
 
 See the design doc for endpoints, data model, and deployment details.
+
+## Frontend Testing
+
+Test the API from a browser:
+
+```bash
+make serve
+# Opens test-frontend.html and starts HTTP server on http://localhost:8080
+# Test all API endpoints with CORS, JSON parsing, auth flows
+```
+
+## GitHub Pages Deployment
+
+Deploy the frontend to GitHub Pages:
+
+1. **Create `web/` directory** with your HTML/CSS/JS files
+2. **Add `web/config.js`** with API base URL:
+   ```javascript
+   const API_BASE = 'https://event-planner-production-d03d.up.railway.app/api/v1';
+   ```
+3. **Push to GitHub:**
+   ```bash
+   git add web/
+   git commit -m "Add frontend"
+   git push
+   ```
+4. **Enable GitHub Pages:**
+   - Go to repo Settings → Pages
+   - Source: Deploy from branch
+   - Branch: `main`, Folder: `/web`
+   - Save
+5. **Access at:** `https://<username>.github.io/<repo-name>/`
+
+No build step needed - just static HTML/CSS/JS!
 
 ## Docker
 
