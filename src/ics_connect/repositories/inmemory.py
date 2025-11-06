@@ -63,6 +63,30 @@ class _ReservationRepo(ReservationRepository):
         waitlisted_sorted = sorted(waitlisted_list, key=_created_at)
         return waitlisted_sorted[0] if waitlisted_sorted else None
 
+    def find_active_by_event_and_user(
+        self, event_id: str, user_id: str
+    ) -> Reservation | None:
+        for r in self._store.reservations.values():
+            if (
+                r.event_id == event_id
+                and r.user_id == user_id
+                and r.status != ReservationStatus.CANCELED
+            ):
+                return r
+        return None
+
+    def find_active_by_event_and_email(self, event_id: str, email: str) -> Reservation | None:
+        email_l = email.strip().lower()
+        for r in self._store.reservations.values():
+            if (
+                r.event_id == event_id
+                and r.email is not None
+                and r.email.strip().lower() == email_l
+                and r.status != ReservationStatus.CANCELED
+            ):
+                return r
+        return None
+
 
 class InMemoryRepos(Repos):
     def __init__(self, store: Store) -> None:
