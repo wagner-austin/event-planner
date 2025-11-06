@@ -43,6 +43,14 @@ make test
 - guard scripts: forbid Any/cast/type: ignore; forbid bare except; forbid print
 - pytest + coverage: 100% statements and branches on src/ics_connect
 
+Frontend (Node) checks:
+- Requires `npm` and a functional `web/node_modules`.
+- The `web-check` step uses existing `node_modules` by default to avoid Windows file-lock issues (e.g., esbuild.exe in use).
+- To force a fresh install, set `WEB_CHECK_INSTALL=1` in your environment before `make check`:
+  - PowerShell: `$env:WEB_CHECK_INSTALL = '1'; make check`
+  - Bash: `WEB_CHECK_INSTALL=1 make check`
+  If install errors persist, close editors/antivirus holding locks, then run `cd web && npm ci` manually.
+
 ## Environment (dev)
 - API (env, prefixed with `ICS_`):
   - `ICS_JWT_SECRET` (required in prod; defaults to `dev-secret` in dev)
