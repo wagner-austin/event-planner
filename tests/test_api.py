@@ -36,39 +36,46 @@ class TestAPI(unittest.TestCase):
         self.repos = InMemoryRepos(self.store)
 
     def test_event_create_get_and_reserve_flow(self) -> None:
+        from ics_connect.util.jwt import encode_token
+
         now = dt.datetime.now(dt.UTC)
         body = make_body(now)
         created = create_event_ep(body, self.repos)
         event = created["event"]
         event_id: str = event["id"]
-        self.assertEqual(event["title"], body["title"]) 
+        self.assertEqual(event["title"], body["title"])
 
         got = get_event_ep(event_id, self.repos)
         self.assertEqual(got["id"], event_id)
 
-        # Reserve first attendee (confirmed)
+        # Create auth token for first user
+        user1_id = "user-ana-123"
+        auth_token1 = encode_token({"sub": user1_id, "email": "ana@uci.edu", "name": "Ana"})
+
+        # Reserve first attendee (confirmed) with user_id
         reserve_body: ReserveBody = {
             "display_name": "Ana",
             "email": "ana@uci.edu",
             "join_code": None,
         }
-        reserve = reserve_ep(event_id, reserve_body, self.repos)
-        token: str = reserve["token"]
+        reserve = reserve_ep(event_id, reserve_body, self.repos, user_id=user1_id)
         reservation = reserve["reservation"]
         self.assertEqual(reservation["status"], "confirmed")
 
-        # Check my reservation
-        mine = my_reservation_ep(event_id, token, self.repos)
-        self.assertEqual(mine["id"], reservation["id"]) 
+        # Check my reservation using auth token (not reservation token)
+        mine = my_reservation_ep(event_id, auth_token1, self.repos)
+        self.assertEqual(mine["id"], reservation["id"])
 
         # Second attendee should be waitlisted due to capacity
+        user2_id = "user-ben-456"
         reserve2 = reserve_ep(
             event_id,
             {"display_name": "Ben", "email": "ben@uci.edu", "join_code": None},
             self.repos,
+            user_id=user2_id,
         )
         self.assertEqual(reserve2["reservation"]["status"], "waitlisted")
 
-        # Cancel first; second should be promoted automatically
-        cancel = cancel_my_reservation_ep(event_id, token, self.repos)
+        # Cancel first using auth token; second should be promoted automatically
+        cancel = cancel_my_reservation_ep(event_id, auth_token1, self.repos)
         self.assertEqual(cancel["status"], "canceled")
