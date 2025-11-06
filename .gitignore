@@ -39,3 +39,16 @@ Thumbs.db
 
 *.log
 .claude
+
+# Frontend build artifacts and caches
+web/node_modules/
+web/coverage/
+web/assets/js/
+web/.eslintcache
+web/**/*.tsbuildinfo
+web/npm-debug.log*
+
+# Misc local caches
+.turbo/
+.parcel-cache/
+.vite/
