@@ -38,27 +38,63 @@ class TestHTTPAPI(unittest.TestCase):
         r2 = self.client.get(f"/api/v1/events/{event_id}")
         self.assertEqual(r2.status_code, 200)
 
-        # First reservation: confirmed
-        # Since we avoid JSON parsing for strict typing, we assert the
-        # reserve endpoint is accessible and returns a 2xx/4xx as expected
+        # Reserve requires login now
+        # Attempt without auth -> 400
         rb = {"display_name": "Ana", "email": "ana@uci.edu", "join_code": None}
         r3 = self.client.post(f"/api/v1/events/{event_id}/reserve", json=rb)
-        self.assertEqual(r3.status_code, 200)
-        m2 = re.search(r'"token":"([^"]+)"', r3.text)
+        self.assertEqual(r3.status_code, 400)
+        # Perform a login
+        login_body: dict[str, object] = {"email": "ana@uci.edu", "display_name": "Ana"}
+        rlogin = self.client.post("/api/v1/auth/login", json=login_body)
+        self.assertEqual(rlogin.status_code, 200)
+        m2 = re.search(r'"token":"([^"]+)"', rlogin.text)
         self.assertIsNotNone(m2)
         token = m2.group(1) if m2 else ""
+        # Reserve with Authorization
+        r3b = self.client.post(
+            f"/api/v1/events/{event_id}/reserve",
+            json=rb,
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        self.assertEqual(r3b.status_code, 200)
+        # Response contains reservation token, but /mine and /cancel use auth token now
 
-        # My reservation via Authorization bearer
+        # My reservation via Authorization bearer (using auth token, not reservation token)
         r4 = self.client.get(
             f"/api/v1/events/{event_id}/mine", headers={"Authorization": f"Bearer {token}"}
         )
         self.assertEqual(r4.status_code, 200)
 
-        # Cancel mine
+        # Cancel mine (using auth token, not reservation token)
         r5 = self.client.post(
             f"/api/v1/events/{event_id}/cancel", headers={"Authorization": f"Bearer {token}"}
         )
         self.assertEqual(r5.status_code, 200)
+
+        # Reserve with Authorization header from login, to cover profile-linked path
+        login_body2: dict[str, object] = {"email": "test@uci.edu", "display_name": "Tester"}
+        rlogin2 = self.client.post("/api/v1/auth/login", json=login_body2)
+        self.assertEqual(rlogin2.status_code, 200)
+        m3 = re.search(r'"token":"([^"]+)"', rlogin2.text)
+        self.assertIsNotNone(m3)
+        utok = m3.group(1) if m3 else ""
+        # Make a new event and reserve with Authorization: Bearer <user token>
+        r6 = self.client.post("/api/v1/events", json=payload)
+        self.assertEqual(r6.status_code, 200)
+        m4 = re.search(r'"id":"([^"]+)"', r6.text)
+        self.assertIsNotNone(m4)
+        event2 = m4.group(1) if m4 else ""
+        rb2: dict[str, object] = {
+            "display_name": "Tester",
+            "email": "test@uci.edu",
+            "join_code": None,
+        }
+        r7 = self.client.post(
+            f"/api/v1/events/{event2}/reserve",
+            json=rb2,
+            headers={"Authorization": f"Bearer {utok}"},
+        )
+        self.assertEqual(r7.status_code, 200)
 
     def test_http_search_and_health(self) -> None:
         rs = self.client.get("/api/v1/search")
