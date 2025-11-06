@@ -21,8 +21,9 @@ def run(roots: list[str]) -> int:
         try:
             tree = ast.parse(text, filename=str(path))
         except Exception as exc:  # pragma: no cover
-            errors.append(f"{path}: PARSE_ERROR {exc}")
-            continue
+            import sys
+            sys.stderr.write(f"{path}: PARSE_ERROR {exc}\n")
+            raise
         errs = [
             f"{path}:{n.lineno} use logger; 'print' is forbidden"
             for n in ast.walk(tree)
@@ -34,7 +35,8 @@ def run(roots: list[str]) -> int:
         ]
         errors.extend(errs)
     if errors:
-        print("\n".join(errors))
+        import sys
+        sys.stderr.write("\n".join(errors) + "\n")
         return 1
     return 0
 
