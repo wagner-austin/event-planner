@@ -1,0 +1,84 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https:;" />
+  <title>ICS Connect</title>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-title">ICS Connect</h1>
+      <nav class="site-nav"><a href="#search" aria-current="page">Search</a> | <a href="#details">Details</a></nav>
+    </div>
+  </header>
+  <main class="container">
+    <section class="banner banner--error hidden" id="error-banner" role="alert" aria-live="assertive"></section>
+
+    <section id="search" class="card">
+      <h2>Find Events</h2>
+      <form id="search-form" class="form-grid" novalidate>
+        <label for="q">Search</label>
+        <input id="q" name="q" type="search" placeholder="keyword" />
+
+        <label for="start">Start (ISO)</label>
+        <input id="start" name="start" type="datetime-local" />
+
+        <label for="to">To (ISO)</label>
+        <input id="to" name="to" type="datetime-local" />
+
+        <label for="limit">Page size</label>
+        <input id="limit" name="limit" type="number" min="1" max="50" value="10" />
+
+        <button class="btn btn--primary" type="submit">Search</button>
+      </form>
+    </section>
+
+    <section aria-live="polite" aria-busy="false" id="results-section">
+      <h2 class="sr-only">Results</h2>
+      <div id="results" class="list"></div>
+      <div class="actions">
+        <button id="load-more" class="btn">Load more</button>
+      </div>
+    </section>
+    <section id="details" class="card">
+      <h2 id="event-title">Event</h2>
+      <p id="event-datetime"></p>
+      <p id="event-location"></p>
+      <p id="event-desc"></p>
+      <p id="event-stats"></p>
+    </section>
+    <section class="card" id="rsvp-section">
+      <h3>RSVP</h3>
+      <form id="rsvp-form" class="form-grid" novalidate>
+        <label for="display_name">Name</label>
+        <input id="display_name" name="display_name" type="text" required />
+        <label for="email">Email (optional)</label>
+        <input id="email" name="email" type="email" />
+        <div id="join-code-row" class="hidden">
+          <label for="join_code">Join Code</label>
+          <input id="join_code" name="join_code" type="text" />
+        </div>
+        <button class="btn btn--primary" type="submit">Reserve</button>
+      </form>
+      <div id="rsvp-result" class="note"></div>
+    </section>
+    <section class="card" id="mine-section">
+      <h3>My Reservation</h3>
+      <div id="my-reservation" class="note">No reservation yet.</div>
+      <button id="cancel-reservation" class="btn btn--danger hidden">Cancel Reservation</button>
+    </section>
+  </main>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
+
+
+
+
+
+
