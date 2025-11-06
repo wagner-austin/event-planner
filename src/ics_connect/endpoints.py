@@ -75,7 +75,12 @@ def get_event_ep(event_id: str, repos: Repos) -> EventPublic:
     return to_public(ev, int(confirmed), int(waitlisted))
 
 
-def reserve_ep(event_id: str, body: ReserveBody, repos: Repos) -> ReserveResponse:
+def reserve_ep(
+    event_id: str,
+    body: ReserveBody,
+    repos: Repos,
+    user_id: str | None = None,
+) -> ReserveResponse:
     ev = repos.events.get(event_id)
     if ev is None:
         raise AppError("NOT_FOUND", "Event not found")
@@ -86,6 +91,7 @@ def reserve_ep(event_id: str, body: ReserveBody, repos: Repos) -> ReserveRespons
             display_name=body["display_name"],
             email=body.get("email"),
             join_code=body.get("join_code"),
+            user_id=user_id,
         ),
     )
     out: ReservationOut = {
@@ -99,15 +105,33 @@ def reserve_ep(event_id: str, body: ReserveBody, repos: Repos) -> ReserveRespons
     return resp
 
 
-def my_reservation_ep(event_id: str, token: str, repos: Repos) -> ReservationOut:
+def my_reservation_ep(event_id: str, auth_token: str, repos: Repos) -> ReservationOut:
+    """Get the authenticated user's reservation for a specific event.
+
+    Args:
+        event_id: The event ID to query
+        auth_token: The user's authentication token (not reservation token)
+        repos: Repository access
+
+    Returns:
+        The user's active reservation for this event
+
+    Raises:
+        AppError: If token is invalid or no active reservation found
+    """
     from .util.jwt import decode_token
 
-    claims = decode_token(token)
-    rid_obj = claims.get("sub")
-    rid = str(rid_obj)
-    r = repos.reservations.get(rid)
-    if r is None or r.event_id != event_id:
+    claims = decode_token(auth_token)
+    user_id_obj = claims.get("sub")
+    if not isinstance(user_id_obj, str) or not user_id_obj.strip():
+        raise AppError("UNAUTHORIZED", "Invalid token")
+    user_id = user_id_obj.strip()
+
+    # Find active reservation for this user on this event
+    r = repos.reservations.find_active_by_event_and_user(event_id, user_id)
+    if r is None:
         raise AppError("NOT_FOUND", "Reservation not found")
+
     out: ReservationOut = {
         "id": r.id,
         "event_id": r.event_id,
@@ -118,14 +142,35 @@ def my_reservation_ep(event_id: str, token: str, repos: Repos) -> ReservationOut
     return out
 
 
-def cancel_my_reservation_ep(event_id: str, token: str, repos: Repos) -> dict[str, str]:
+def cancel_my_reservation_ep(event_id: str, auth_token: str, repos: Repos) -> dict[str, str]:
+    """Cancel the authenticated user's reservation for a specific event.
+
+    Args:
+        event_id: The event ID
+        auth_token: The user's authentication token (not reservation token)
+        repos: Repository access
+
+    Returns:
+        Status message
+
+    Raises:
+        AppError: If token is invalid or no active reservation found
+    """
     from .util.jwt import decode_token
 
-    claims = decode_token(token)
-    rid_obj = claims.get("sub")
-    rid = str(rid_obj)
+    claims = decode_token(auth_token)
+    user_id_obj = claims.get("sub")
+    if not isinstance(user_id_obj, str) or not user_id_obj.strip():
+        raise AppError("UNAUTHORIZED", "Invalid token")
+    user_id = user_id_obj.strip()
+
+    # Find active reservation for this user on this event
+    r = repos.reservations.find_active_by_event_and_user(event_id, user_id)
+    if r is None:
+        raise AppError("NOT_FOUND", "Reservation not found")
+
     svc = ReservationService(repos)
-    svc.cancel_and_maybe_promote(event_id, rid)
+    svc.cancel_and_maybe_promote(event_id, r.id)
     return {"status": "canceled"}
 
 
@@ -180,6 +225,9 @@ def login_ep(body: ProfileBody) -> AuthResponse:
     display_name = body["display_name"].strip()
     if "@" not in email or not display_name:
         raise AppError("INVALID_INPUT", "email and display_name required")
+    # Enforce UCI domain
+    if not email.lower().endswith("@uci.edu"):
+        raise AppError("INVALID_INPUT", "UCI email (@uci.edu) required")
     pid = _profile_id_from_email(email)
     token = encode_token({"sub": pid, "email": email, "name": display_name})
     profile: ProfileOut = {"id": pid, "email": email, "display_name": display_name}
