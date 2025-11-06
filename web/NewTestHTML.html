@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>ICS Connect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="src/style.css">
+    
+  </head>
+
+
+  <body class="page">
+
+    <!-- Header -->
+    <header class="site-header">
+      <div class="container">
+      
+        <h1 class="site-title">ICS Connect</h1>
+        <p class="hero__subtitle">
+          A UCI-exclusive hub for ICS and CS club events. Discover, RSVP, and see when and where these events are happening on campus.
+        </p>
+        <nav class="nav">
+          <!-- Adding a link for signing in -->
+          <a href="#hero" class="nav__link">Sign in with UCI Email</a>
+        </nav>
+      </div>
+    </header>
+
+    <section id="hero" class="hero">
+      <div class="container hero__content">
+      
+        <h1 class="hero__content">Upcoming Events</h1>
+        <p class="hero__subtitle">
+          ICS/CS clubs only (ICSSC, WICS, AI@UCI, HACK@UCI)
+        </p>
+
+        <!--Make these filters look like pill buttons (Note to self)-->
+        <div class="filters">
+          <select class="filters__select">
+            <option>All clubs</option>
+            <option>ICSSC</option>
+            <option>WICS</option>
+            <option>AI@UCI</option>
+            <option>Hack@UCI</option>
+            <option>Design@UCI</option>
+          </select>
+
+          <select class="filters__select">
+            <option>All dates</option>
+            <option>This week</option>
+            <option>This month</option>
+          </select>
+          
+          <!--search bar-->
+          <input    
+            class="filters__search"
+            type="search"
+            placeholder="Search events (e.g. WebJam, ZotHacks)..."
+            />
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Section -->
+    <main class="main">
+      <div class="container main__layout">
+      
+        <section id="section-main" class="section">
+          <header class="section__header">
+            <h3 class="section__title">Events</h3>
+        
+            <p class="section__subtitle">
+              Explore and RSVP to future ICS related events. 
+            </p>
+          </header>
+
+          
+          <div class="cards-grid">
+           <!--Card 1--> 
+            <article class="card card--event">
+              <div class ="card__header">
+                <span class="chip chip--club">HACKS@UCI</span>
+                <h5 class="card__title">ZotHacks 2025</h5>
+              </div>
+              
+              <p class="card__meta">
+                <span>Location: DBH 6011 </span>
+                <span>Nov 7th - Nov 9th (Saturday 8am - 10 pm)</span>
+              </p>
+
+              <p class="card__body">
+                ZotHacks is a 12-hour hackathon designed for beginners 
+                where students with minimal computer science experience will learn to build their first CS project. 
+              </p>
+
+              <div class="card__footer">
+                <button class="btn btn--small btn--primary">RSVP</button>
+                <button class="btn btn--small btn--ghost">Open Website</button>
+                <button class="btn btn--small btn--ghost">Open Discord</button>
+              </div>
+            </article>
+           
+
+            <!-- Card 2 -->
+            <article class="card card--event">
+              <div class ="card_header">
+                <span class="chip chip--club">WICS</span>
+                <h5 class="card__title">Mixer Event</h5>
+              </div>
+
+              <p class="card__meta"> 
+                <span>Location: DBH 6011</span>
+                <span>Nov 3rd 6:30 to 8:00pm</span>
+              </p>
+
+              <p class="card__body">A social fun mixer for WICS to meet, network, and relax during midterm week.</p>
+              <div class="card__footer">
+                <button class="btn btn--small btn--primary">RSVP</button>
+                <button class="btn btn--small btn--ghost">Open Website</button>
+                <button class="btn btn--small btn--ghost">Open Discord</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+      <!-- Embed UCI Map here -->
+      <section class="section section--map">
+        <div class="section__header"> 
+          <h3 class="section__title">Map View</h3>
+            <p class="section__subtitle">Live UCI campus map with ICS related related locations highlighted. Find your way to the event!</p>
+        </div>
+        <div class="map-wrapper">
+          <iframe class="wide-box__frame"
+              src="https://map.uci.edu/?id=463#!ct/92249,95129,95130,95176,95177"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      </section>
+    </main>
+
+    
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="container footer__content">
+        <p>&copy; 2025 Group Project for WebJam</p>
+      </div>
+    </footer>
+  </body>
+</html>
