@@ -21,7 +21,7 @@ def run_guards(roots: list[str]) -> int:
 
 
 def main() -> int:
-    return run_guards(["src", "tests"])
+    return run_guards(["src", "tests", "tools"])
 
 
 if __name__ == "__main__":
