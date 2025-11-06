@@ -152,9 +152,40 @@ class _SQLReservationRepo(ReservationRepository):
         row = sr.first()
         return _from_res_row(row) if row else None
 
+    def find_active_by_event_and_user(self, event_id: str, user_id: str) -> Reservation | None:
+        stmt: Select[tuple[ReservationRow]] = (
+            select(ReservationRow)
+            .where(
+                ReservationRow.event_id == event_id,
+                ReservationRow.user_id == user_id,
+                ReservationRow.status != "canceled",
+            )
+            .limit(1)
+        )
+        sr: ScalarResult[ReservationRow] = self._s.execute(stmt).scalars()
+        row = sr.first()
+        return _from_res_row(row) if row else None
+
+    def find_active_by_event_and_email(self, event_id: str, email: str) -> Reservation | None:
+        email_l = email.strip().lower()
+        stmt: Select[tuple[ReservationRow]] = (
+            select(ReservationRow)
+            .where(
+                ReservationRow.event_id == event_id,
+                ReservationRow.email.is_not(None),
+                func.lower(ReservationRow.email) == email_l,
+                ReservationRow.status != "canceled",
+            )
+            .limit(1)
+        )
+        sr: ScalarResult[ReservationRow] = self._s.execute(stmt).scalars()
+        row = sr.first()
+        return _from_res_row(row) if row else None
+
 
 class SQLRepos(Repos):
     def __init__(self, session: Session) -> None:
+        self._session = session
         self._events = _SQLEventRepo(session)
         self._res = _SQLReservationRepo(session)
 
@@ -166,6 +197,10 @@ class SQLRepos(Repos):
     def reservations(self) -> ReservationRepository:
         return self._res
 
+    @property
+    def session(self) -> Session:
+        """Expose session for transaction management (rollback after errors)."""
+        return self._session
+
 
 __all__ = ["SQLRepos"]
-
