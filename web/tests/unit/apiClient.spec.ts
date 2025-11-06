@@ -66,16 +66,28 @@ describe('ApiClient', () => {
 
   it('reserve() + getMyReservation() + cancelMyReservation()', async () => {
     fetchSpy
-      .mockResolvedValueOnce(ok({ reservation: { id: 'r1', event_id: 'e1', display_name: 'a', email: null, status: 'confirmed' }, token: 'tok' }))
+      .mockResolvedValueOnce(ok({ reservation: { id: 'r1', event_id: 'e1', display_name: 'a', email: null, status: 'confirmed' }, token: 'reservation-tok' }))
       .mockResolvedValueOnce(ok({ id: 'r1', event_id: 'e1', display_name: 'a', email: null, status: 'confirmed' }))
       .mockResolvedValueOnce(ok({ status: 'canceled' }));
 
     const res = await client.reserve('e1', { display_name: 'a', email: null, join_code: null });
-    expect(res.token).toBe('tok');
-    const r = await client.getMyReservation('e1', 'tok');
+    expect(res.token).toBe('reservation-tok');
+    // getMyReservation and cancelMyReservation now use auth token (not reservation token)
+    const authToken = 'auth-tok';
+    const r = await client.getMyReservation('e1', authToken);
     expect(r.id).toBe('r1');
-    const c = await client.cancelMyReservation('e1', 'tok');
+    const c = await client.cancelMyReservation('e1', authToken);
     expect(c.status).toBe('canceled');
+  });
+
+  it('reserve() sends Authorization header when provided', async () => {
+    fetchSpy.mockImplementation(async (_url, init) => {
+      const headers = (init as RequestInit | undefined)?.headers as Record<string,string> | undefined;
+      expect(headers && headers['Authorization']).toBe('Bearer abc');
+      return ok({ reservation: { id: 'r1', event_id: 'e1', display_name: 'a', email: null, status: 'confirmed' }, token: 'tok' });
+    });
+    const res = await client.reserve('e1', { display_name: 'a', email: null, join_code: null }, 'abc');
+    expect(res.token).toBe('tok');
   });
 
   it('throws on invalid shapes for each method', async () => {
