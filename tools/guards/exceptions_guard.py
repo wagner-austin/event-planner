@@ -25,8 +25,10 @@ def run(roots: list[str]) -> int:
             text = path.read_text(encoding="utf-8")
             tree = ast.parse(text, filename=str(path))
         except Exception as exc:  # pragma: no cover
-            errors.append(f"{path}: PARSE_ERROR {exc}")
-            continue
+            # Print and re-raise to avoid swallowing errors
+            import sys
+            sys.stderr.write(f"{path}: PARSE_ERROR {exc}\n")
+            raise
         for node in ast.walk(tree):
             if isinstance(node, ast.ExceptHandler):
                 if node.type is None:
@@ -36,7 +38,8 @@ def run(roots: list[str]) -> int:
                         f"{path}:{node.lineno} except without re-raise is forbidden"
                     )
     if errors:
-        print("\n".join(errors))
+        import sys
+        sys.stderr.write("\n".join(errors) + "\n")
         return 1
     return 0
 
