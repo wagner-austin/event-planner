@@ -60,20 +60,21 @@ export class ApiClient {
     return data;
   }
 
-  async reserve(eventId: string, b: ReserveBody): Promise<ReserveResponse> {
-    const { data } = await httpJson('POST', `${this.base}/events/${encodeURIComponent(eventId)}/reserve`, b);
+  async reserve(eventId: string, b: ReserveBody, authToken?: string): Promise<ReserveResponse> {
+    const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : undefined;
+    const { data } = await httpJson('POST', `${this.base}/events/${encodeURIComponent(eventId)}/reserve`, b, undefined, headers);
     if (!isReserveResponse(data)) throw new Error('Invalid reserve response');
     return data;
   }
 
-  async getMyReservation(eventId: string, token: string): Promise<ReservationOut> {
-    const { data } = await httpJson('GET', `${this.base}/events/${encodeURIComponent(eventId)}/mine`, undefined, undefined, { 'Authorization': `Bearer ${token}` });
+  async getMyReservation(eventId: string, authToken: string): Promise<ReservationOut> {
+    const { data } = await httpJson('GET', `${this.base}/events/${encodeURIComponent(eventId)}/mine`, undefined, undefined, { 'Authorization': `Bearer ${authToken}` });
     if (!isReservationOut(data)) throw new Error('Invalid reservation');
     return data;
   }
 
-  async cancelMyReservation(eventId: string, token: string): Promise<CancelResponse> {
-    const { data } = await httpJson('POST', `${this.base}/events/${encodeURIComponent(eventId)}/cancel`, {}, undefined, { 'Authorization': `Bearer ${token}` });
+  async cancelMyReservation(eventId: string, authToken: string): Promise<CancelResponse> {
+    const { data } = await httpJson('POST', `${this.base}/events/${encodeURIComponent(eventId)}/cancel`, {}, undefined, { 'Authorization': `Bearer ${authToken}` });
     if (!isCancelResponse(data)) throw new Error('Invalid cancel response');
     return data;
   }
