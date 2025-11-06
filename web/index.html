@@ -1,80 +1,146 @@
 ﻿<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https:;" />
-  <title>ICS Connect</title>
-  <link rel="stylesheet" href="assets/css/base.css">
-  <link rel="stylesheet" href="assets/css/layout.css">
-  <link rel="stylesheet" href="assets/css/components.css">
-</head>
-<body>
-  <header class="site-header">
-    <div class="container">
-      <h1 class="site-title">ICS Connect</h1>
-      <nav class="site-nav"><a href="#search" aria-current="page">Search</a> | <a href="#details">Details</a></nav>
-    </div>
-  </header>
-  <main class="container">
-    <section class="banner banner--error hidden" id="error-banner" role="alert" aria-live="assertive"></section>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self' https:; frame-src 'self' https://map.uci.edu;" />
+    <title>ICS Connect</title>
+    <link rel="stylesheet" href="assets/css/base.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/NewTestCSS.css">
+  </head>
+  <body class="page">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="container">
+        <h1 class="site-title"><a href="#hero" class="site-title__link">ICS Connect</a></h1>
+        <nav class="nav">
+          <a href="#login" class="nav__link">Sign in with UCI Email</a>
+          <span id="auth-chip" class="chip chip--user hidden" aria-live="polite">
+            <span id="auth-name"></span>
+            <button id="logout" class="btn btn--ghost btn--chip" type="button">Sign out</button>
+          </span>
+        </nav>
+      </div>
+    </header>
 
-    <section id="search" class="card">
-      <h2>Find Events</h2>
-      <form id="search-form" class="form-grid" novalidate>
-        <label for="q">Search</label>
-        <input id="q" name="q" type="search" placeholder="keyword" />
+    <!-- Hero / Filters -->
+    <section id="hero" class="hero">
+      <div class="container hero__content">
+        <h1 class="hero__content">Upcoming Events</h1>
+        <p class="hero__subtitle">ICS/CS clubs only (ICSSC, WICS, AI@UCI, HACK@UCI)</p>
 
-        <label for="start">Start (ISO)</label>
-        <input id="start" name="start" type="datetime-local" />
-
-        <label for="to">To (ISO)</label>
-        <input id="to" name="to" type="datetime-local" />
-
-        <label for="limit">Page size</label>
-        <input id="limit" name="limit" type="number" min="1" max="50" value="10" />
-
-        <button class="btn btn--primary" type="submit">Search</button>
-      </form>
-    </section>
-
-    <section aria-live="polite" aria-busy="false" id="results-section">
-      <h2 class="sr-only">Results</h2>
-      <div id="results" class="list"></div>
-      <div class="actions">
-        <button id="load-more" class="btn">Load more</button>
+        <form id="search-form" class="filters" novalidate>
+          <select id="club-filter" class="filters__select" aria-label="Club filter">
+            <option value="all">All clubs</option>
+            <option value="ICSSC">ICSSC</option>
+            <option value="WICS">WICS</option>
+            <option value="AI@UCI">AI@UCI</option>
+            <option value="Hack@UCI">Hack@UCI</option>
+            <option value="Design@UCI">Design@UCI</option>
+          </select>
+          <select id="date-filter" class="filters__select" aria-label="Date filter">
+            <option value="all">All dates</option>
+            <option value="week">This week</option>
+            <option value="month">This month</option>
+          </select>
+          <input id="q" name="q" class="filters__search" type="search" placeholder="Search events (e.g. WebJam, ZotHacks)..." />
+          <!-- Hidden advanced fields used by SPA search -->
+          <input id="start" name="start" type="datetime-local" class="sr-only" />
+          <input id="to" name="to" type="datetime-local" class="sr-only" />
+          <input id="limit" name="limit" type="number" min="1" max="50" value="10" class="sr-only" />
+          <button class="btn btn--primary" type="submit">Search</button>
+        </form>
       </div>
     </section>
-    <section id="details" class="card">
-      <h2 id="event-title">Event</h2>
-      <p id="event-datetime"></p>
-      <p id="event-location"></p>
-      <p id="event-desc"></p>
-      <p id="event-stats"></p>
-    </section>
-    <section class="card" id="rsvp-section">
-      <h3>RSVP</h3>
-      <form id="rsvp-form" class="form-grid" novalidate>
-        <label for="display_name">Name</label>
-        <input id="display_name" name="display_name" type="text" required />
-        <label for="email">Email (optional)</label>
-        <input id="email" name="email" type="email" />
-        <div id="join-code-row" class="hidden">
-          <label for="join_code">Join Code</label>
-          <input id="join_code" name="join_code" type="text" />
-        </div>
-        <button class="btn btn--primary" type="submit">Reserve</button>
-      </form>
-      <div id="rsvp-result" class="note"></div>
-    </section>
-    <section class="card" id="mine-section">
-      <h3>My Reservation</h3>
-      <div id="my-reservation" class="note">No reservation yet.</div>
-      <button id="cancel-reservation" class="btn btn--danger hidden">Cancel Reservation</button>
-    </section>
-  </main>
-  <script type="module" src="assets/js/app.js"></script>
-</body>
+
+    <main class="main">
+      <div class="container main__layout">
+        <!-- Login Section -->
+        <section id="login" class="card">
+          <h2>Sign In</h2>
+          <form id="login-form" class="form-grid" novalidate>
+            <label for="login_display_name">Name</label>
+            <input id="login_display_name" name="display_name" type="text" required />
+            <label for="login_email">UCI Email</label>
+            <input id="login_email" name="email" type="email" placeholder="you@uci.edu" required />
+            <button class="btn btn--primary" type="submit">Sign In</button>
+          </form>
+          <div id="login-result" class="note"></div>
+        </section>
+        <section class="banner banner--error hidden" id="error-banner" role="alert" aria-live="assertive"></section>
+
+        <!-- Results Grid (SPA renders cards here) -->
+        <section aria-live="polite" aria-busy="false" id="results-section" class="section">
+          <header class="section__header">
+            <h3 class="section__title">Events</h3>
+            <p class="section__subtitle">Explore and RSVP to future ICS related events.</p>
+          </header>
+          <div id="results" class="cards-grid list"></div>
+          <div class="actions">
+            <button id="load-more" class="btn">Load more</button>
+          </div>
+        </section>
+
+        <!-- Event Details -->
+        <section id="details" class="card">
+          <h2 id="event-title">Event</h2>
+          <p id="event-datetime"></p>
+          <p id="event-location"></p>
+          <p id="event-desc"></p>
+          <p id="event-stats"></p>
+        </section>
+
+        <!-- RSVP -->
+        <section class="card" id="rsvp-section">
+          <h3>RSVP</h3>
+          <form id="rsvp-form" class="form-grid" novalidate>
+            <label for="display_name">Name</label>
+            <input id="display_name" name="display_name" type="text" required />
+            <label for="email">Email (optional)</label>
+            <input id="email" name="email" type="email" />
+            <div id="join-code-row" class="hidden">
+              <label for="join_code">Join Code</label>
+              <input id="join_code" name="join_code" type="text" />
+            </div>
+            <button class="btn btn--primary" type="submit">Reserve</button>
+          </form>
+          <div id="rsvp-result" class="note"></div>
+        </section>
+
+        <!-- My Reservation -->
+        <section class="card" id="mine-section">
+          <h3>My Reservation</h3>
+          <div id="my-reservation" class="note">No reservation yet.</div>
+          <button id="cancel-reservation" class="btn btn--danger hidden">Cancel Reservation</button>
+        </section>
+
+        <!-- Map Section (optional) -->
+        <section class="section section--map">
+          <div class="section__header">
+            <h3 class="section__title">Map View</h3>
+            <p class="section__subtitle">Live UCI campus map with ICS related locations highlighted.</p>
+          </div>
+          <div class="map-wrapper">
+            <iframe class="wide-box__frame"
+                    src="https://map.uci.edu/?id=463#!ct/92249,95129,95130,95176,95177"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer__content">
+        <p>&copy; 2025 Group Project for WebJam</p>
+      </div>
+    </footer>
+
+    <script type="module" src="assets/js/app.js"></script>
+  </body>
 </html>
 
 
