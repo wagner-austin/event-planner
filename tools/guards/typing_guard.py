@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import ast
 import sys
+import tokenize
 from collections.abc import Iterable
+from io import StringIO
 from pathlib import Path
 
 FORBIDDEN_IMPORTS = {"Any", "cast"}
@@ -21,8 +23,11 @@ def check_path(path: Path) -> list[str]:
     try:
         text = path.read_text(encoding="utf-8")
         tree = ast.parse(text, filename=str(path))
-    except Exception as exc:  # pragma: no cover - guard must not crash
-        return [f"{path}: PARSE_ERROR {exc}"]
+    except Exception as exc:  # pragma: no cover - guard must not crash silently
+        # Surface parse errors explicitly and re-raise to fail the check
+        import sys
+        sys.stderr.write(f"{path}: PARSE_ERROR {exc}\n")
+        raise
 
     # Detect forbidden typing imports and usage
     for node in ast.walk(tree):
@@ -55,10 +60,14 @@ def check_path(path: Path) -> list[str]:
         if isinstance(node, ast.Name) and node.id == "Any":
             errors.append(f"{path}:{node.lineno} forbidden type 'Any'")
 
-    # Find inline comment ignores
-    for i, line in enumerate(text.splitlines(), start=1):
-        if "# type: ignore" in line:
-            errors.append(f"{path}:{i} forbidden 'type: ignore'")
+    # Find inline comment ignores using tokenization (avoid string literals)
+    reader = StringIO(text).readline
+    comment_ignores = [
+        f"{path}:{tok.start[0]} forbidden 'type: ignore'"
+        for tok in tokenize.generate_tokens(reader)
+        if tok.type == tokenize.COMMENT and 'type: ignore' in tok.string
+    ]
+    errors.extend(comment_ignores)
 
     return errors
 
@@ -68,7 +77,8 @@ def run(roots: list[str]) -> int:
     for p in iter_python_files(roots):
         all_errors.extend(check_path(p))
     if all_errors:
-        print("\n".join(all_errors))
+        import sys
+        sys.stderr.write("\n".join(all_errors) + "\n")
         return 1
     return 0
 
@@ -79,3 +89,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
