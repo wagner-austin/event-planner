@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 import datetime as dt
+import os
 import unittest
 
 from fastapi.testclient import TestClient
 
-from ics_connect.main import app
+from ics_connect.main import create_app
 
 
 class TestHTTPValidation(unittest.TestCase):
     def setUp(self) -> None:
-        self.client = TestClient(app)
+        os.environ["ICS_RATE_LIMIT_WRITE"] = "1000"
+        os.environ["ICS_RATE_LIMIT_READ"] = "1000"
+        self.client = TestClient(create_app())
 
     def test_create_event_invalid_types(self) -> None:
         now = dt.datetime.now(dt.UTC)
@@ -83,6 +86,46 @@ class TestHTTPValidation(unittest.TestCase):
         end = r1.text.find('"', start)
         event_id = r1.text[start:end]
 
+        # login to obtain auth token
+        login_body: dict[str, object] = {"email": "a@uci.edu", "display_name": "A"}
+        rlogin = self.client.post("/api/v1/auth/login", json=login_body)
+        self.assertEqual(rlogin.status_code, 200)
+        start2 = rlogin.text.find('"token":"')
+        self.assertGreaterEqual(start2, 0)
+        start2 += len('"token":"')
+        end2 = rlogin.text.find('"', start2)
+        token = rlogin.text[start2:end2]
+
         bad_body: dict[str, object] = {"display_name": "A", "email": None, "join_code": 123}
-        r2 = self.client.post(f"/api/v1/events/{event_id}/reserve", json=bad_body)
+        r2 = self.client.post(
+            f"/api/v1/events/{event_id}/reserve",
+            json=bad_body,
+            headers={"Authorization": f"Bearer {token}"},
+        )
         self.assertEqual(r2.status_code, 400)
+
+    def test_reserve_requires_authorization(self) -> None:
+        now = dt.datetime.now(dt.UTC)
+        payload: dict[str, object] = {
+            "title": "Beta",
+            "description": None,
+            "type": None,
+            "starts_at": (now + dt.timedelta(hours=1)).isoformat(),
+            "ends_at": (now + dt.timedelta(hours=2)).isoformat(),
+            "location_text": None,
+            "capacity": 1,
+            "public": True,
+            "requires_join_code": False,
+            "tags": [],
+        }
+        r1 = self.client.post("/api/v1/events", json=payload)
+        self.assertEqual(r1.status_code, 200)
+        start = r1.text.find('"id":"')
+        self.assertGreaterEqual(start, 0)
+        start += len('"id":"')
+        end = r1.text.find('"', start)
+        event_id = r1.text[start:end]
+
+        body: dict[str, object] = {"display_name": "", "email": None, "join_code": None}
+        r2 = self.client.post(f"/api/v1/events/{event_id}/reserve", json=body)
+        self.assertIn(r2.status_code, (400, 429))
