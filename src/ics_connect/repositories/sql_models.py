@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from sqlalchemy import Boolean, DateTime, Integer, MetaData, String, Text
+from sqlalchemy import Boolean, DateTime, Index, Integer, MetaData, String, Text, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -34,6 +34,18 @@ class EventRow(Base):
 
 class ReservationRow(Base):
     __tablename__ = "reservations"
+    __table_args__ = (
+        # Unique constraint: one active reservation per user per event
+        # Partial index only enforces for non-canceled, authenticated reservations
+        Index(
+            'idx_unique_active_user_reservation',
+            'event_id',
+            'user_id',
+            unique=True,
+            postgresql_where=text("status != 'canceled' AND user_id IS NOT NULL"),
+            sqlite_where=text("status != 'canceled' AND user_id IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     event_id: Mapped[str] = mapped_column(String)
