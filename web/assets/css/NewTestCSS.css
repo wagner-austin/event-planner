@@ -41,16 +41,33 @@
       background: rgba(19, 1, 41, 0.95);
       backdrop-filter: blur(10px);
       padding: var(--space-sm) 0;
+      position: sticky;
+      position: -webkit-sticky; /* iOS/Safari */
+      top: 0;
+      z-index: 10000;
+      width: 100%;
+    }
+    @supports not ((position: sticky) or (position: -webkit-sticky)) {
+      .site-header { position: fixed; top: 0; left: 0; right: 0; }
+      .page { padding-top: 64px; }
     }
 
     .site-title{
       margin: 0;
       font-size:var(--space-lg);
+      color: var(--color-text);
     }
+    .site-title__link{ color: var(--color-text); text-decoration: none; }
+    .site-title__link:link{ color: var(--color-text); }
+    .site-title__link:visited{ color: var(--color-text); }
+    .site-title__link:hover{ text-decoration: none; }
 
     .nav{
       margin-top: var(--space-sm);
       margin-bottom: var(--space-sm);
+      display: flex;
+      gap: var(--space-sm);
+      align-items: center;
     }
 
     .nav__link{
@@ -77,9 +94,12 @@
         flex-direction: column;
       }
 
+    html { scroll-behavior: smooth; }
     .hero {
         padding: var(--space-xl) 0 var(--space-lg);
+        scroll-margin-top: 72px; /* ensure anchor link not hidden behind sticky header */
       }
+    #login { scroll-margin-top: 72px; }
 
     .hero__content { 
       font-size: 2.4rem; 
@@ -219,3 +239,13 @@
         text-transform:uppercase; 
         letter-spacing:0.04em 
     }
+      .chip--user { 
+        gap: 0.35rem; 
+        background: var(--color-accent-soft); 
+        color: var(--color-text);
+      }
+      .btn--chip { 
+        padding: 0.1rem 0.5rem; 
+        font-size: 0.75rem; 
+        line-height: 1.2; 
+      }
