@@ -45,7 +45,7 @@ describe('RSVP persists across refresh via last event id + token', () => {
   it('stores last event and restores details + my reservation after refresh', async () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 0));
