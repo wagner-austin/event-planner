@@ -46,7 +46,7 @@ describe('logout clears all reservation tokens and auth state', () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
     // open details and reserve
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 0));
