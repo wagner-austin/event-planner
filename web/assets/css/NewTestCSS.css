@@ -196,15 +196,33 @@
       border-color: var(--color-border) }
 
       /* Carda */
-      .card { 
-        background: linear-gradient(135deg, var(--color-surface), var(--alternative-surface-color)); 
-        border-radius:var(--radius-lg); 
-        padding:var(--space-md); 
-        border:1px solid var(--color-border); 
-        box-shadow:var(--shadow-soft); 
-        display:flex; 
-        flex-direction:column; 
-        gap:var(--space-sm) 
+      .card {
+        background: linear-gradient(135deg, var(--color-surface), var(--alternative-surface-color));
+        border-radius:var(--radius-lg);
+        padding:var(--space-md);
+        border:1px solid var(--color-border);
+        box-shadow:var(--shadow-soft);
+        display:flex;
+        flex-direction:column;
+        gap:var(--space-sm)
+    }
+      .card--clickable {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+      .card--clickable:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        background: linear-gradient(135deg, #2a2f3a, #323844);
+        border-color: #4a5568;
+    }
+      .card--clickable:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+      .card--clickable:focus-visible {
+        outline: 2px solid #60a5fa;
+        outline-offset: 2px;
     }
       .card__header { 
         display:flex; 
