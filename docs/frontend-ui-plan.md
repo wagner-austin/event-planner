@@ -237,7 +237,7 @@ Token store (`web/src/state/tokenStore.ts`):
 
 - Unit: pure functions (converters, token store, query param parsing).
 - Integration (browser): Playwright or Cypress (optional) against production/staging; verify CORS, auth flows, RSVP lifecycle.
-- Manual: retain `test-frontend.html` during development but do not deploy it. Prefer the new pages.
+- Manual: use `index.html` locally via `make serve` for ad-hoc checks; prefer automated unit tests and the main pages.
 
 ## Drift Prevention
 
