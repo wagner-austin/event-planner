@@ -202,7 +202,11 @@ def search_ep(params: SearchParams, repos: Repos) -> SearchResult:
         events = [e for e in events if e.starts_at <= params.to]
     total = len(events)
     page = events[params.offset : params.offset + params.limit]
-    out: list[EventPublic] = [to_public(ev, 0, 0) for ev in page]
+    out: list[EventPublic] = []
+    for ev in page:
+        confirmed = repos.reservations.count_confirmed(ev.id)
+        waitlisted = repos.reservations.count_waitlisted(ev.id)
+        out.append(to_public(ev, int(confirmed), int(waitlisted)))
     result: SearchResult = {"events": out, "total": total}
     return result
 
