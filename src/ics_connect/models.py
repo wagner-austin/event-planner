@@ -22,6 +22,8 @@ class Event:
     admin_key_hash: str
     capacity: int
     waitlist_enabled: bool
+    discord_link: str | None
+    website_link: str | None
     created_at: dt.datetime = field(default_factory=utcnow)
 
 
