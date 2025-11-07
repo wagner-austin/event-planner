@@ -19,6 +19,8 @@ class CreateEventInput:
     location_text: str | None
     public: bool
     requires_join_code: bool
+    discord_link: str | None
+    website_link: str | None
     capacity: int
 
 
@@ -53,6 +55,8 @@ class EventService:
             admin_key_hash=hash_secret(admin_key_raw),
             capacity=data.capacity,
             waitlist_enabled=True,
+            discord_link=data.discord_link,
+            website_link=data.website_link,
         )
         self._repos.events.create(ev)
         return CreatedEvent(event=ev, join_code=join_code_raw, admin_key=admin_key_raw)
