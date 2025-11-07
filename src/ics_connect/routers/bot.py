@@ -53,6 +53,8 @@ def _parse_create_event_body(data: dict[str, object]) -> CreateEventBody:
         "starts_at": parse_datetime(starts_at_raw, "starts_at"),
         "ends_at": parse_datetime(ends_at_raw, "ends_at"),
         "location_text": get_optional_str(data, "location_text"),
+        "discord_link": get_optional_str(data, "discord_link"),
+        "website_link": get_optional_str(data, "website_link"),
         "capacity": capacity,
         "public": require_bool(data, "public"),
         "requires_join_code": require_bool(data, "requires_join_code"),
