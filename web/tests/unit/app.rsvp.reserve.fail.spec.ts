@@ -48,7 +48,7 @@ describe('RSVP reserve failure shows banner', () => {
   it('displays "RSVP failed" when reserve rejects', async () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 0));
