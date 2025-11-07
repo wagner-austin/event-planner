@@ -23,6 +23,8 @@ def make_body(now: dt.datetime) -> CreateEventBody:
         "starts_at": (now + dt.timedelta(hours=1)),
         "ends_at": (now + dt.timedelta(hours=2)),
         "location_text": "ICS 432",
+        "discord_link": None,
+        "website_link": None,
         "capacity": 1,
         "public": True,
         "requires_join_code": False,
