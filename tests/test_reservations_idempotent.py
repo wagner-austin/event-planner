@@ -22,6 +22,8 @@ class TestReservationsIdempotent(unittest.TestCase):
                 description=None,
                 type=None,
                 location_text=None,
+                discord_link=None,
+                website_link=None,
                 public=True,
                 requires_join_code=False,
                 capacity=5,
