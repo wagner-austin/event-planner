@@ -47,7 +47,7 @@ describe('ApiClient', () => {
     fetchSpy.mockResolvedValue(ok({
       id: '1', title: 't', description: null, type: null,
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      location_text: null, tags: [], public: true, capacity: 1,
+      location_text: null, discord_link: null, website_link: null, tags: [], public: true, capacity: 1,
       confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     }));
     const ev = await client.getEvent('1');
