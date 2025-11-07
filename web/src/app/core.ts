@@ -122,6 +122,29 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
       setText(qsStrictEl('#event-stats', doc), `${ev.confirmedCount}/${ev.capacity} attending`);
       const jrow = qsStrictEl('#join-code-row', doc);
       if (ev.requiresJoinCode) { show(jrow); } else { hide(jrow); }
+
+      // Show/hide links
+      const linksContainer = doc.querySelector<HTMLElement>('#event-links');
+      const discordLink = doc.querySelector<HTMLAnchorElement>('#discord-link');
+      const websiteLink = doc.querySelector<HTMLAnchorElement>('#website-link');
+      let hasLinks = false;
+      if (discordLink && ev.discordLink) {
+        discordLink.href = ev.discordLink;
+        show(discordLink);
+        hasLinks = true;
+      } else if (discordLink) {
+        hide(discordLink);
+      }
+      if (websiteLink && ev.websiteLink) {
+        websiteLink.href = ev.websiteLink;
+        show(websiteLink);
+        hasLinks = true;
+      } else if (websiteLink) {
+        hide(websiteLink);
+      }
+      if (linksContainer) {
+        if (hasLinks) { show(linksContainer); } else { hide(linksContainer); }
+      }
       await refreshMyReservation();
       const detailsEl = qsStrictEl('#details', doc);
       const rsvpEl = qsStrictEl('#rsvp-section', doc);
