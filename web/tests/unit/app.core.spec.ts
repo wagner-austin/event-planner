@@ -86,7 +86,7 @@ describe('app core guards and branches', () => {
     const app = createApp(document, deps);
     await app.init();
     // results created at init; get anchor
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).toBeTruthy();
     // Deactivate this instance and then click link to trigger early return at guard
     document.body.setAttribute('data-app-instance', 'other');
