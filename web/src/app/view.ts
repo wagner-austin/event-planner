@@ -16,17 +16,21 @@ export function setNoReservationUI(doc: Document): void {
 
 export function renderEventCard(e: ReturnType<typeof toEventView>, onOpen: (eventId: string) => void): HTMLElement {
   const card = document.createElement('article');
-  card.className = 'card';
-  const title = document.createElement('h3');
-  title.className = 'card__title';
-  const a = document.createElement('a');
-  a.href = `#details`;
-  a.textContent = e.title;
-  a.addEventListener('click', (ev) => {
-    ev.preventDefault();
+  card.className = 'card card--clickable';
+  card.setAttribute('role', 'button');
+  card.setAttribute('tabindex', '0');
+  card.addEventListener('click', () => {
     onOpen(e.id);
   });
-  title.appendChild(a);
+  card.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' || ev.key === ' ') {
+      ev.preventDefault();
+      onOpen(e.id);
+    }
+  });
+  const title = document.createElement('h3');
+  title.className = 'card__title';
+  title.textContent = e.title;
   const meta = document.createElement('div');
   meta.className = 'card__meta';
   meta.textContent = `${fmtRange(e.startsAt, e.endsAt)} • ${e.locationText ?? 'TBD'} • ${e.confirmedCount}/${e.capacity}`;
