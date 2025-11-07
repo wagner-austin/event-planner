@@ -16,6 +16,8 @@ class TestWorkerPayload(unittest.TestCase):
             "starts_at": (now + dt.timedelta(hours=1)).isoformat(),
             "ends_at": (now + dt.timedelta(hours=2)).isoformat(),
             "location_text": None,
+            "discord_link": None,
+            "website_link": None,
             "capacity": 3,
             "public": True,
             "requires_join_code": False,
