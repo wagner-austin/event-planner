@@ -2,8 +2,16 @@ import { qsStrictEl, setText, hide, show } from '../util/dom.js';
 import { toEventView } from '../types.js';
 
 export function fmtRange(start: Date, end: Date): string {
-  const d1 = start.toLocaleString();
-  const d2 = end.toLocaleString();
+  const opts: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  };
+  const d1 = start.toLocaleString(undefined, opts);
+  const d2 = end.toLocaleString(undefined, opts);
   return `${d1} - ${d2}`;
 }
 

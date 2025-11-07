@@ -153,8 +153,9 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
         detailsEl.scrollIntoView({ behavior: 'smooth' });
       }
     } catch (err) {
-      deps.log.error('showEventDetails failed', { err: errMsg(err) });
-      setText(banner, 'Failed to load event');
+      const msg = errMsg(err);
+      deps.log.error('showEventDetails failed', { err: msg });
+      setText(banner, `Failed to load event: ${msg}`);
       show(banner);
     }
   };
