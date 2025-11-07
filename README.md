@@ -24,7 +24,7 @@ make test
 - `make lint`  → poetry lock + install, ruff (fix), mypy --strict, yamllint, guard scripts
 - `make test`  → poetry install, pytest with coverage (term + XML)
 - `make check` → lint + test
-- `make serve` → open test-frontend.html + start local HTTP server on :8080
+- `make serve` → start local HTTP server on :8080 and open `index.html`
 - `make start` → docker compose up (db optional, api) with build
 - `make stop`  → docker compose stop
 - `make clean` → stop, remove volumes/images, rebuild
@@ -65,12 +65,12 @@ See the design doc for endpoints, data model, and deployment details.
 
 ## Frontend Testing
 
-Test the API from a browser:
+Test the frontend and API from a browser:
 
 ```bash
 make serve
-# Opens test-frontend.html and starts HTTP server on http://localhost:8080
-# Test all API endpoints with CORS, JSON parsing, auth flows
+# Opens http://localhost:8080/index.html
+# Exercise search, login, RSVP, and reservation flows
 ```
 
 ## GitHub Pages Deployment
