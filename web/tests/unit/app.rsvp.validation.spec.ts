@@ -30,30 +30,27 @@ function setupDom(): void {
   document.body.innerHTML = `
     <section id="error-banner" class="banner banner--error hidden"></section>
     <section id="search"><form id="search-form" novalidate><input id="q" /><input id="start" /><input id="to" /><input id="limit" value="10" /></form><div id="results"></div><div class="actions"><button id="load-more">More</button></div></section>
-    <section id="details" class="card"><h2 id="event-title"></h2><p id="event-datetime"></p><p id="event-location"></p><p id="event-desc"></p><p id="event-stats"></p></section>
-    <section id="rsvp-section"><form id="rsvp-form" novalidate><label for="display_name">Name</label><input id="display_name" /><label for="email">Email</label><input id="email" /><div id="join-code-row" class="hidden"><input id="join_code" /></div><button type="submit" id="rsvp-submit">Reserve</button></form><div id="rsvp-result"></div></section>
+    <section id="details" class="card hidden"><h2 id="event-title"></h2><p id="event-datetime"></p><p id="event-location"></p><p id="event-desc"></p><p id="event-stats"></p></section>
+    <section id="rsvp-section" class="hidden"><form id="rsvp-form" novalidate><div id="join-code-row" class="hidden"><input id="join_code" /></div><button type="submit" id="rsvp-submit">Reserve</button></form><div id="rsvp-result"></div></section>
     <section id="mine-section"><div id="my-reservation">No reservation yet.</div><button id="cancel-reservation">Cancel</button></section>`;
 }
 
-describe('RSVP field validation', () => {
+describe('RSVP uses authenticated user profile', () => {
   beforeEach(() => { setupDom(); localStorage.clear(); localStorage.setItem('ics.auth.token', 'utok'); reserveSpy.mockReset(); });
   afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); document.body.innerHTML = ''; });
 
-  it('shows banner for non-UCI email and does not reserve', async () => {
+  it('creates reservation using profile from auth token', async () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 0));
-    (document.querySelector('#display_name') as HTMLInputElement).value = 'U';
-    (document.querySelector('#email') as HTMLInputElement).value = 'foo@example.com';
+    // RSVP form no longer has display_name/email fields - uses authenticated user's profile
     (document.querySelector('#rsvp-form') as HTMLFormElement).dispatchEvent(new Event('submit'));
     await new Promise((r) => setTimeout(r, 0));
-    const banner = document.querySelector('#error-banner') as HTMLElement;
-    expect(banner.classList.contains('hidden')).toBe(false);
-    expect((banner.textContent || '')).toContain('UCI email');
-    expect(reserveSpy).not.toHaveBeenCalled();
+    // Should successfully create reservation using authenticated profile
+    expect(reserveSpy).toHaveBeenCalled();
   });
 });
 
