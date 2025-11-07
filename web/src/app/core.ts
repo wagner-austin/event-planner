@@ -124,6 +124,9 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
       if (ev.requiresJoinCode) { show(jrow); } else { hide(jrow); }
       await refreshMyReservation();
       const detailsEl = qsStrictEl('#details', doc);
+      const rsvpEl = qsStrictEl('#rsvp-section', doc);
+      show(detailsEl);
+      show(rsvpEl);
       if (typeof detailsEl.scrollIntoView === 'function') {
         detailsEl.scrollIntoView({ behavior: 'smooth' });
       }
@@ -181,8 +184,8 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
     const newOffset = offset + view.length;
     params.set('offset', String(newOffset));
     const loadMoreBtnNow = qsStrictEl('#load-more', doc);
-    if (newOffset >= res.total || view.length === 0) { loadMoreBtnNow.setAttribute('disabled', 'true'); }
-    else { loadMoreBtnNow.removeAttribute('disabled'); }
+    if (newOffset >= res.total || view.length === 0) { hide(loadMoreBtnNow); }
+    else { show(loadMoreBtnNow); }
   };
 
   return {
@@ -229,19 +232,13 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
               return;
             }
 
-            const display_name = qsStrictInput('#display_name', doc).value.trim();
-            const emailVal = qsStrictInput('#email', doc).value.trim();
-            if (emailVal && !isUciEmail(emailVal)) {
-              showBanner(doc, 'UCI email (@uci.edu) required');
-              submitBtn.disabled = false;
-              return;
-            }
-
             const joinCodeInput = doc.querySelector<HTMLInputElement>('#join_code');
             const join_codeVal = (joinCodeInput && typeof joinCodeInput.value === 'string') ? joinCodeInput.value.trim() : '';
 
-            // Make API call
-            client.reserve(eventId, { display_name, email: emailVal || null, join_code: join_codeVal || null }, authTok).then(res => {
+            // Get user profile and make reservation
+            client.getMe(authTok).then(profile => {
+              return client.reserve(eventId, { display_name: profile.display_name, email: profile.email, join_code: join_codeVal || null }, authTok);
+            }).then(res => {
               setReservationToken(eventId, res.token);
               setText(qsStrictEl('#rsvp-result', doc), `Reservation ${res.reservation.status}`);
               // Refresh event details to update attendee count, and refresh reservation displays
@@ -268,15 +265,9 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
           const nameEl = doc.querySelector<HTMLElement>('#auth-name');
           if (nameEl) nameEl.textContent = name;
           for (const a of Array.from(doc.querySelectorAll<HTMLElement>('.nav__link'))) { a.classList.add('hidden'); }
-          // Hide RSVP name/email fields when authenticated
-          const dnLabel = doc.querySelector<HTMLElement>('label[for="display_name"]');
-          const dnInput = doc.querySelector<HTMLElement>('#display_name');
-          const emLabel = doc.querySelector<HTMLElement>('label[for="email"]');
-          const emInput = doc.querySelector<HTMLElement>('#email');
-          dnLabel?.classList.add('hidden');
-          dnInput?.classList.add('hidden');
-          emLabel?.classList.add('hidden');
-          emInput?.classList.add('hidden');
+          // Show "My Reservation" section when authenticated
+          const mineSection = doc.querySelector<HTMLElement>('#mine-section');
+          if (mineSection) mineSection.classList.remove('hidden');
         };
         const showLoggedOut = (): void => {
           const res = doc.querySelector<HTMLElement>('#login-result');
@@ -288,15 +279,9 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
           const nameEl = doc.querySelector<HTMLElement>('#auth-name');
           if (nameEl) nameEl.textContent = '';
           for (const a of Array.from(doc.querySelectorAll<HTMLElement>('.nav__link'))) { a.classList.remove('hidden'); }
-          // Show RSVP name/email fields when logged out
-          const dnLabel = doc.querySelector<HTMLElement>('label[for="display_name"]');
-          const dnInput = doc.querySelector<HTMLElement>('#display_name');
-          const emLabel = doc.querySelector<HTMLElement>('label[for="email"]');
-          const emInput = doc.querySelector<HTMLElement>('#email');
-          dnLabel?.classList.remove('hidden');
-          dnInput?.classList.remove('hidden');
-          emLabel?.classList.remove('hidden');
-          emInput?.classList.remove('hidden');
+          // Hide "My Reservation" section when logged out
+          const mineSection = doc.querySelector<HTMLElement>('#mine-section');
+          if (mineSection) mineSection.classList.add('hidden');
         };
 
         const bindLoginSubmit = (form: HTMLFormElement): void => {
