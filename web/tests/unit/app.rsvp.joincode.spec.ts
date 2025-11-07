@@ -52,7 +52,7 @@ describe('RSVP join_code non-null branch', () => {
   it('passes a non-null join_code when provided', async () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 0));
