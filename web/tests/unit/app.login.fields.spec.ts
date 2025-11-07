@@ -33,36 +33,26 @@ function setupDom(): void {
       </form>
     </section>
     <section id="rsvp-section"><form id="rsvp-form" novalidate>
-      <label for="display_name">Name</label><input id="display_name" />
-      <label for="email">Email</label><input id="email" />
       <div id="join-code-row" class="hidden"><input id="join_code" /></div>
     </form></section>
-    <section id="mine-section"><div id="my-reservation"></div><button id="cancel-reservation"></button></section>`;
+    <section id="mine-section" class="hidden"><div id="my-reservation"></div><button id="cancel-reservation"></button></section>`;
 }
 
-describe('login hides RSVP fields; logout shows them', () => {
+describe('login shows My Reservation section; logout hides it', () => {
   beforeEach(() => { setupDom(); localStorage.clear(); localStorage.setItem('ics.auth.token', 'tok'); });
   afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; localStorage.clear(); });
 
-  it('toggles RSVP labels/inputs on login/logout', async () => {
+  it('toggles My Reservation section visibility on login/logout', async () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
-    // On login, fields hidden
-    const dnLabel = document.querySelector('label[for="display_name"]') as HTMLElement;
-    const dnInput = document.querySelector('#display_name') as HTMLElement;
-    const emLabel = document.querySelector('label[for="email"]') as HTMLElement;
-    const emInput = document.querySelector('#email') as HTMLElement;
-    expect(dnLabel.classList.contains('hidden')).toBe(true);
-    expect(dnInput.classList.contains('hidden')).toBe(true);
-    expect(emLabel.classList.contains('hidden')).toBe(true);
-    expect(emInput.classList.contains('hidden')).toBe(true);
+    // On login, My Reservation section is shown
+    const mineSection = document.querySelector('#mine-section') as HTMLElement;
+    expect(mineSection.classList.contains('hidden')).toBe(false);
     // Logout
     const lo = document.createElement('button'); lo.id = 'logout'; document.body.appendChild(lo);
     lo.click();
     await new Promise((r) => setTimeout(r, 0));
-    expect(dnLabel.classList.contains('hidden')).toBe(false);
-    expect(dnInput.classList.contains('hidden')).toBe(false);
-    expect(emLabel.classList.contains('hidden')).toBe(false);
-    expect(emInput.classList.contains('hidden')).toBe(false);
+    // After logout, My Reservation section is hidden
+    expect(mineSection.classList.contains('hidden')).toBe(true);
   });
 });
