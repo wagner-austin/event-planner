@@ -102,7 +102,7 @@ describe('app behavior', () => {
     await new Promise((r) => setTimeout(r, 0));
     const results = document.querySelector('#results') as HTMLElement;
     expect(results.children.length).toBeGreaterThan(0);
-    const link = results.querySelector('a') as HTMLAnchorElement;
+    const link = results.querySelector('.card') as HTMLElement;
     link.click();
     await new Promise((r) => setTimeout(r, 0));
     expect((document.querySelector('#event-title') as HTMLElement).textContent).toContain('Event One');
@@ -142,7 +142,7 @@ describe('app behavior', () => {
     proto.search = async (_p: any) => ({ events: [{ id: 'e1', title: 'Event One', description: 'Desc', type: null, starts_at: '2025-01-01T10:00:00.000Z', ends_at: '2025-01-01T11:00:00.000Z', location_text: 'Room 101', tags: [], public: true, capacity: 10, confirmed_count: 1, waitlist_count: 0, requires_join_code: true }], total: 1 });
     (document.querySelector('#search-form') as HTMLFormElement).dispatchEvent(new Event('submit'));
     await new Promise((r) => setTimeout(r, 0));
-    const link = document.querySelector('#results a') as HTMLAnchorElement;
+    const link = document.querySelector('#results .card') as HTMLElement;
     link.click();
     await new Promise((r) => setTimeout(r, 0));
     localStorage.setItem('ics.resv.e1', 'tok');
@@ -175,8 +175,7 @@ describe('app behavior', () => {
     const desc = card.querySelector('.card__desc') as HTMLElement;
     expect(meta.textContent || '').toContain('TBD');
     expect(desc.textContent || '').toBe('');
-    const link2 = card.querySelector('a') as HTMLAnchorElement;
-    link2.click();
+    card.click();
     await new Promise((r) => setTimeout(r, 0));
     const jrow = document.querySelector('#join-code-row') as HTMLElement;
     expect(jrow.classList.contains('hidden')).toBe(true);
@@ -228,7 +227,7 @@ describe('app behavior', () => {
     cancelBtn.click();
     await new Promise((r) => setTimeout(r, 0));
     expect(cancelSpy).not.toHaveBeenCalled();
-    const link = document.querySelector('#results a') as HTMLAnchorElement;
+    const link = document.querySelector('#results .card') as HTMLElement;
     link.click();
     await new Promise((r) => setTimeout(r, 0));
     cancelBtn.click();
@@ -273,7 +272,7 @@ describe('app behavior', () => {
     await new Promise((r) => setTimeout(r, 0));
     (document.querySelector('#search-form') as HTMLFormElement).dispatchEvent(new Event('submit'));
     await new Promise((r) => setTimeout(r, 0));
-    const link = document.querySelector('#results a') as HTMLAnchorElement;
+    const link = document.querySelector('#results .card') as HTMLElement;
     link.click();
     await new Promise((r) => setTimeout(r, 0));
     const join = document.querySelector('#join_code');
@@ -327,7 +326,7 @@ describe('app behavior', () => {
     const details = document.querySelector('#details') as any;
     let called = 0;
     Object.defineProperty(details, 'scrollIntoView', { value: () => { called += 1; }, configurable: true });
-    const link = document.querySelector('#results a') as HTMLAnchorElement;
+    const link = document.querySelector('#results .card') as HTMLElement;
     link.click();
     await new Promise((r) => setTimeout(r, 0));
     expect(called).toBe(1);
@@ -342,7 +341,7 @@ describe('app behavior', () => {
     const proto = ApiClient.prototype as any;
     const orig = proto.getEvent;
     proto.getEvent = async () => { throw new Error('boom'); };
-    const link = document.querySelector('#results a') as HTMLAnchorElement;
+    const link = document.querySelector('#results .card') as HTMLElement;
     link.click();
     await new Promise((r) => setTimeout(r, 0));
     const banner = document.querySelector('#error-banner') as HTMLElement;
