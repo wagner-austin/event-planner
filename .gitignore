@@ -38,7 +38,6 @@ Thumbs.db
 *.dll
 
 *.log
-.claude
 
 # Frontend build artifacts and caches
 web/node_modules/
