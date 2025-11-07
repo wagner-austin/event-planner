@@ -245,6 +245,11 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
             if (!authTok) {
               showBanner(doc, 'Please sign in to reserve');
               submitBtn.disabled = false;
+              // Navigate to login section
+              const loginSection = doc.querySelector<HTMLElement>('#login');
+              if (loginSection && typeof loginSection.scrollIntoView === 'function') {
+                loginSection.scrollIntoView({ behavior: 'smooth' });
+              }
               return;
             }
 
