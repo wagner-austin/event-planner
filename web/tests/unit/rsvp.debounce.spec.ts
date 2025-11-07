@@ -49,7 +49,7 @@ describe('RSVP submit debounced', () => {
   it('only triggers one reserve call while in-flight', async () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 0));
