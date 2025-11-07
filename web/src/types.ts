@@ -10,6 +10,8 @@ export interface EventPublicWire {
   starts_at: string; // ISO
   ends_at: string; // ISO
   location_text: string | null;
+  discord_link: string | null;
+  website_link: string | null;
   tags: string[];
   public: boolean;
   capacity: number;
@@ -42,6 +44,8 @@ export interface EventView {
   startsAt: Date;
   endsAt: Date;
   locationText: string | null;
+  discordLink: string | null;
+  websiteLink: string | null;
   tags: string[];
   public: boolean;
   capacity: number;
@@ -78,6 +82,14 @@ export function isEventPublicWire(x: unknown): x is EventPublicWire {
   if (!hasProp(x,'ends_at') || !isString(x['ends_at'])) return false;
   if (!hasProp(x,'location_text')) return false; {
     const v = x['location_text'];
+    if (!(v === null || isString(v))) return false;
+  }
+  if (!hasProp(x,'discord_link')) return false; {
+    const v = x['discord_link'];
+    if (!(v === null || isString(v))) return false;
+  }
+  if (!hasProp(x,'website_link')) return false; {
+    const v = x['website_link'];
     if (!(v === null || isString(v))) return false;
   }
   if (!hasProp(x,'tags')) return false; {
@@ -152,6 +164,8 @@ export function toEventView(w: EventPublicWire): EventView {
     startsAt: starts,
     endsAt: ends,
     locationText: w.location_text,
+    discordLink: w.discord_link,
+    websiteLink: w.website_link,
     tags: w.tags.slice(),
     public: w.public,
     capacity: w.capacity,
