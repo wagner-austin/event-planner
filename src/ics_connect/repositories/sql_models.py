@@ -29,6 +29,8 @@ class EventRow(Base):
     admin_key_hash: Mapped[str] = mapped_column(String)
     capacity: Mapped[int] = mapped_column(Integer)
     waitlist_enabled: Mapped[bool] = mapped_column(Boolean)
+    discord_link: Mapped[str | None] = mapped_column(String, nullable=True)
+    website_link: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime)
 
 
