@@ -270,9 +270,10 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
             }).then(res => {
               setReservationToken(eventId, res.token);
               setText(qsStrictEl('#rsvp-result', doc), `Reservation ${res.reservation.status}`);
-              // Refresh event details to update attendee count, and refresh reservation displays
+              // Refresh event details, search results, and reservation displays
               return Promise.all([
                 showEventDetails(eventId),
+                doSearch(false),
                 refreshMyReservation(),
                 refreshAllReservations(),
               ]);
@@ -382,7 +383,7 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
             btn.textContent = 'Canceling...';
             client.cancelMyReservation(eventId, authToken).then(() => {
               clearReservationToken(eventId);
-              return Promise.all([showEventDetails(eventId), refreshMyReservation(), refreshAllReservations()]);
+              return Promise.all([showEventDetails(eventId), doSearch(false), refreshMyReservation(), refreshAllReservations()]);
             }).catch(() => { showBanner(doc, 'Cancel failed'); }).finally(() => { btn.textContent = prev; btn.removeAttribute('disabled'); });
           } else if (t.dataset.action === 'cancel-item' || !!t.closest('[data-action="cancel-item"]')) {
             hideBanner(doc);
@@ -403,9 +404,9 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
             btnEl.textContent = 'Canceling...';
             client.cancelMyReservation(eid, authToken).then(() => {
               clearReservationToken(eid);
-              // Refresh event details if it's currently shown, otherwise just refresh lists
+              // Refresh event details if it's currently shown, search results, and reservation lists
               const isCurrentEvent = currentEventId === eid;
-              const tasks = [refreshMyReservation(), refreshAllReservations()];
+              const tasks = [doSearch(false), refreshMyReservation(), refreshAllReservations()];
               if (isCurrentEvent) tasks.unshift(showEventDetails(eid));
               return Promise.all(tasks);
             }).catch(() => { btnEl.textContent = prevText; btnEl.removeAttribute('disabled'); showBanner(doc, 'Cancel failed'); });
