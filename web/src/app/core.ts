@@ -124,26 +124,25 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
       if (ev.requiresJoinCode) { show(jrow); } else { hide(jrow); }
 
       // Show/hide links
-      const linksContainer = doc.querySelector<HTMLElement>('#event-links');
-      const discordLink = doc.querySelector<HTMLAnchorElement>('#discord-link');
+      const websitePara = doc.querySelector<HTMLElement>('#event-website');
       const websiteLink = doc.querySelector<HTMLAnchorElement>('#website-link');
-      let hasLinks = false;
-      if (discordLink && ev.discordLink) {
-        discordLink.href = ev.discordLink;
-        show(discordLink);
-        hasLinks = true;
-      } else if (discordLink) {
-        hide(discordLink);
-      }
-      if (websiteLink && ev.websiteLink) {
+      const discordPara = doc.querySelector<HTMLElement>('#event-discord');
+      const discordLink = doc.querySelector<HTMLAnchorElement>('#discord-link');
+
+      if (websiteLink && websitePara && ev.websiteLink) {
         websiteLink.href = ev.websiteLink;
-        show(websiteLink);
-        hasLinks = true;
-      } else if (websiteLink) {
-        hide(websiteLink);
+        websiteLink.textContent = ev.websiteLink;
+        show(websitePara);
+      } else if (websitePara) {
+        hide(websitePara);
       }
-      if (linksContainer) {
-        if (hasLinks) { show(linksContainer); } else { hide(linksContainer); }
+
+      if (discordLink && discordPara && ev.discordLink) {
+        discordLink.href = ev.discordLink;
+        discordLink.textContent = ev.discordLink;
+        show(discordPara);
+      } else if (discordPara) {
+        hide(discordPara);
       }
       await refreshMyReservation();
       const detailsEl = qsStrictEl('#details', doc);
