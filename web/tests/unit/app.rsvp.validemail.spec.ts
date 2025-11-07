@@ -40,26 +40,24 @@ function setupDom(): void {
   document.body.innerHTML = `
     <section id="error-banner" class="banner banner--error hidden"></section>
     <section id="search"><form id="search-form" novalidate><input id="q" /><input id="start" /><input id="to" /><input id="limit" value="10" /></form><div id="results"></div><div class="actions"><button id="load-more">More</button></div></section>
-    <section id="details" class="card"><h2 id="event-title"></h2><p id="event-datetime"></p><p id="event-location"></p><p id="event-desc"></p><p id="event-stats"></p></section>
-    <section id="rsvp-section"><form id="rsvp-form" novalidate><label for="display_name">Name</label><input id="display_name" /><label for="email">Email</label><input id="email" /><div id="join-code-row" class="hidden"><input id="join_code" /></div><button type="submit" id="rsvp-submit">Reserve</button></section>
+    <section id="details" class="card hidden"><h2 id="event-title"></h2><p id="event-datetime"></p><p id="event-location"></p><p id="event-desc"></p><p id="event-stats"></p></section>
+    <section id="rsvp-section" class="hidden"><form id="rsvp-form" novalidate><div id="join-code-row" class="hidden"><input id="join_code" /></div><button type="submit" id="rsvp-submit">Reserve</button></form></section>
     <section id="mine-section"><div id="my-reservation">No reservation yet.</div><button id="cancel-reservation">Cancel</button></section>`;
 }
 
-describe('RSVP valid UCI email path', () => {
+describe('RSVP with authenticated user', () => {
   beforeEach(() => { setupDom(); localStorage.clear(); localStorage.setItem('ics.auth.token', 'utok'); reserveSpy.mockReset(); });
   afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); document.body.innerHTML = ''; });
 
-  it('accepts @uci.edu email and submits', async () => {
+  it('submits RSVP using authenticated user profile', async () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
     // Open event details first
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 0));
-    // Fill form with valid email
-    (document.querySelector('#display_name') as HTMLInputElement).value = 'U';
-    (document.querySelector('#email') as HTMLInputElement).value = 'u@uci.edu';
+    // Submit RSVP form - no need to fill fields as it uses auth profile
     (document.querySelector('#rsvp-form') as HTMLFormElement).dispatchEvent(new Event('submit'));
     await new Promise((r) => setTimeout(r, 0));
     expect(reserveSpy).toHaveBeenCalledTimes(1);
