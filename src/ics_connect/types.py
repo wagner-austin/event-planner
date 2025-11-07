@@ -19,6 +19,8 @@ class CreateEventBody(TypedDict):
     capacity: int
     public: bool
     requires_join_code: bool
+    discord_link: str | None
+    website_link: str | None
     tags: list[str]
 
 
@@ -30,6 +32,8 @@ class EventPublic(TypedDict):
     starts_at: dt.datetime
     ends_at: dt.datetime
     location_text: str | None
+    discord_link: str | None
+    website_link: str | None
     tags: list[str]
     public: bool
     capacity: int
