@@ -41,7 +41,7 @@ describe('Cancel without token', () => {
     await import('../../src/app');
     await new Promise((r) => setTimeout(r, 0));
     // Open event to set currentEventId
-    (document.querySelector('#results a') as HTMLAnchorElement).click();
+    (document.querySelector('#results .card') as HTMLElement).click();
     await new Promise((r) => setTimeout(r, 0));
     // No reservation token present for e1
     const btn = document.querySelector('#cancel-reservation') as HTMLButtonElement;
