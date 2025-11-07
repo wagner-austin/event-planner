@@ -26,7 +26,7 @@ describe('extra type guards', () => {
     const base: Record<string, unknown> = {
       id: '1', title: 't', description: null, type: null,
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      location_text: null, tags: [], public: true, capacity: 1,
+      location_text: null, discord_link: null, website_link: null, tags: [], public: true, capacity: 1,
       confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     };
     expect(isEventPublicWire(base)).toBe(true);
@@ -44,7 +44,7 @@ describe('extra type guards', () => {
     const goodEv: Record<string, unknown> = {
       id: '1', title: 't', description: null, type: null,
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      location_text: null, tags: [], public: true, capacity: 1,
+      location_text: null, discord_link: null, website_link: null, tags: [], public: true, capacity: 1,
       confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     };
     expect(isSearchResultWire({ events: [goodEv], total: 1 })).toBe(true);
@@ -56,7 +56,7 @@ describe('extra type guards', () => {
     const ev: Record<string, unknown> = {
       id: '1', title: 't', description: 'desc', type: 't',
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      location_text: 'loc', tags: ['tag'], public: true, capacity: 1,
+      location_text: 'loc', discord_link: null, website_link: null, tags: ['tag'], public: true, capacity: 1,
       confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     };
     expect(isEventPublicWire(ev)).toBe(true);
