@@ -98,6 +98,8 @@ def _parse_create_event_body(data: dict[str, object]) -> CreateEventBody:
         "capacity": require_int(data, "capacity"),
         "public": require_bool(data, "public"),
         "requires_join_code": require_bool(data, "requires_join_code"),
+        "discord_link": get_optional_str(data, "discord_link"),
+        "website_link": get_optional_str(data, "website_link"),
         "tags": parse_string_list(data, "tags"),
     }
     return payload
