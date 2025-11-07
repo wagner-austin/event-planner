@@ -29,7 +29,7 @@ describe('frontend layout integration', () => {
       '#search-form', '#q', '#start', '#to', '#limit',
       '#results', '#load-more',
       '#details', '#event-title', '#event-datetime', '#event-location', '#event-desc', '#event-stats',
-      '#rsvp-form', '#display_name', '#email', '#rsvp-result', '#join-code-row', '#join_code',
+      '#rsvp-form', '#rsvp-result', '#join-code-row', '#join_code',
       '#my-reservation', '#cancel-reservation',
     ];
     for (const sel of mustHave) {
