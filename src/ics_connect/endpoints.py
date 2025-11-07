@@ -32,6 +32,8 @@ def to_public(ev: Event, confirmed: int, waitlisted: int) -> EventPublic:
         "starts_at": ev.starts_at,
         "ends_at": ev.ends_at,
         "location_text": ev.location_text,
+        "discord_link": ev.discord_link,
+        "website_link": ev.website_link,
         "tags": [],
         "public": ev.public,
         "capacity": ev.capacity,
@@ -53,6 +55,8 @@ def create_event_ep(body: CreateEventBody, repos: Repos) -> CreatedEventResponse
             location_text=body.get("location_text"),
             public=body["public"],
             requires_join_code=body["requires_join_code"],
+            discord_link=body.get("discord_link"),
+            website_link=body.get("website_link"),
             capacity=body["capacity"],
         )
     )
