@@ -57,7 +57,7 @@ describe('type guard branch coverage', () => {
     const base: Record<string, unknown> = {
       id: '1', title: 't', description: null, type: null,
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      public: true, capacity: 1, confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
+      discord_link: null, website_link: null, public: true, capacity: 1, confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     };
     expect(isEventPublicWire(base)).toBe(false);
     const noTags = { ...base, location_text: null };
@@ -68,7 +68,7 @@ describe('type guard branch coverage', () => {
     const base: Record<string, unknown> = {
       id: '1', description: null, type: null,
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      location_text: null, tags: [], public: true, capacity: 1,
+      location_text: null, discord_link: null, website_link: null, tags: [], public: true, capacity: 1,
       confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     };
     expect(isEventPublicWire(base)).toBe(false);
@@ -80,7 +80,7 @@ describe('type guard branch coverage', () => {
     const base: Record<string, unknown> = {
       id: '1', title: 't', description: null, type: null,
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      location_text: null, tags: [], public: true, capacity: 1,
+      location_text: null, discord_link: null, website_link: null, tags: [], public: true, capacity: 1,
       confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     };
     const badStart = { ...base, starts_at: 123 } as Record<string, unknown>;
@@ -93,7 +93,7 @@ describe('type guard branch coverage', () => {
     const base: Record<string, unknown> = {
       id: '1', title: 't', description: null, type: null,
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      location_text: null, tags: [], public: true, capacity: 1,
+      location_text: null, discord_link: null, website_link: null, tags: [], public: true, capacity: 1,
       confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     };
     expect(isEventPublicWire({ ...base, location_text: 5 })).toBe(false);
@@ -108,7 +108,7 @@ describe('type guard branch coverage', () => {
     const base: Record<string, unknown> = {
       id: '1', title: 't',
       starts_at: '2025-01-01T00:00:00.000Z', ends_at: '2025-01-01T01:00:00.000Z',
-      location_text: null, tags: [], public: true, capacity: 1,
+      location_text: null, discord_link: null, website_link: null, tags: [], public: true, capacity: 1,
       confirmed_count: 0, waitlist_count: 0, requires_join_code: false,
     };
     expect(isEventPublicWire(base)).toBe(false);
