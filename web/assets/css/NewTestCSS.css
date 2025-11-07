@@ -262,8 +262,15 @@
         background: var(--color-accent-soft); 
         color: var(--color-text);
       }
-      .btn--chip { 
-        padding: 0.1rem 0.5rem; 
-        font-size: 0.75rem; 
-        line-height: 1.2; 
+      .btn--chip {
+        padding: 0.1rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1.2;
+      }
+
+      /* Event Links */
+      .event-links {
+        display: flex;
+        gap: var(--space-sm);
+        margin-top: var(--space-sm);
       }
