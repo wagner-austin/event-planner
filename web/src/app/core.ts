@@ -4,7 +4,6 @@ import { toEventView, type SearchResultWire } from '../types.js';
 import { setReservationToken, clearReservationToken, clearAllReservationTokens, setAuthToken, getAuthToken, clearAuthToken, setLastSelectedEvent, getLastSelectedEvent, clearLastSelectedEvent, listReservationEntries } from '../state/tokenStore.js';
 import { renderEventCard, setNoReservationUI, fmtRange, showBanner, hideBanner } from './view.js';
 import { restoreLastEvent } from './restore.js';
-import { ApiError } from '../api/http.js';
 import type { AppDeps } from './deps.js';
 
 function errMsg(err: unknown): string { return err instanceof Error ? err.message : String(err); }
@@ -110,7 +109,6 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
 
   const showEventDetails = async (eventId: string): Promise<void> => {
     if (!isActive()) return;
-    const banner = qsStrictEl('#error-banner', doc);
     try {
       currentEventId = eventId;
       setLastSelectedEvent(eventId);
@@ -155,17 +153,11 @@ export function createApp(doc: Document, deps: AppDeps): { init: () => Promise<v
       }
     } catch (err) {
       const msg = errMsg(err);
-      // If event not found (deleted), clear localStorage and don't show error
-      if (err instanceof ApiError && err.status === 404) {
-        deps.log.warn('Event not found, clearing localStorage', { eventId });
-        clearLastSelectedEvent();
-        clearReservationToken(eventId);
-        currentEventId = null;
-        return;
-      }
-      deps.log.error('showEventDetails failed', { err: msg });
-      setText(banner, `Failed to load event: ${msg}`);
-      show(banner);
+      deps.log.warn('showEventDetails failed, clearing localStorage', { eventId, err: msg });
+      clearLastSelectedEvent();
+      clearReservationToken(eventId);
+      currentEventId = null;
+      hideBanner(doc);
     }
   };
 

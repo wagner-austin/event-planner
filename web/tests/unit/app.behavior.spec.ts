@@ -345,8 +345,8 @@ describe('app behavior', () => {
     link.click();
     await new Promise((r) => setTimeout(r, 0));
     const banner = document.querySelector('#error-banner') as HTMLElement;
-    expect(banner.classList.contains('hidden')).toBe(false);
-    expect(banner.textContent || '').toContain('Failed to load event');
+    // Banner should stay hidden - errors are silently handled
+    expect(banner.classList.contains('hidden')).toBe(true);
     proto.getEvent = orig;
   });
 });
