@@ -15,7 +15,7 @@ describe('html interactions', () => {
   it('site title links to #hero', () => {
     const dom = loadDom();
     const d = dom.window.document;
-    const a = d.querySelector('.site-title a') as HTMLAnchorElement | null;
+    const a = d.querySelector('.site-title a') as HTMLElement | null;
     expect(a).not.toBeNull();
     expect(a!.getAttribute('href')).toBe('#hero');
     expect(d.querySelector('#hero')).not.toBeNull();
@@ -24,7 +24,7 @@ describe('html interactions', () => {
   it('nav link points to #login', () => {
     const dom = loadDom();
     const d = dom.window.document;
-    const a = d.querySelector('.nav__link') as HTMLAnchorElement | null;
+    const a = d.querySelector('.nav__link') as HTMLElement | null;
     expect(a).not.toBeNull();
     expect(a!.getAttribute('href')).toBe('#login');
     expect(d.querySelector('#login')).not.toBeNull();
