@@ -180,7 +180,7 @@ describe('RSVP refreshes event stats', () => {
     await new Promise((r) => setTimeout(r, 50));
 
     // 3. Click on an event to view details
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 50));
@@ -221,7 +221,7 @@ describe('RSVP refreshes event stats', () => {
     await new Promise((r) => setTimeout(r, 50));
 
     // 3. Click on an event
-    const link = document.querySelector('#results a') as HTMLAnchorElement | null;
+    const link = document.querySelector('#results .card') as HTMLElement | null;
     expect(link).not.toBeNull();
     link!.click();
     await new Promise((r) => setTimeout(r, 50));
@@ -270,7 +270,7 @@ describe('RSVP refreshes event stats', () => {
     await new Promise((r) => setTimeout(r, 50));
 
     // 3. Click on an event to view details
-    const link = document.querySelector('#results a') as HTMLAnchorElement;
+    const link = document.querySelector('#results .card') as HTMLElement;
     link.click();
     await new Promise((r) => setTimeout(r, 50));
 
